@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# generated
+src/generated/
+
+# local data (embedded postgres, uploads)
+.data/
+storage/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# logs / tests
+*.log
+npm-debug.log*
+coverage/
+
+# os / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
