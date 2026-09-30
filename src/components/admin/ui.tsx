@@ -67,6 +67,7 @@ export function KpiCard({
   value,
   delta,
   deltaLabel,
+  hint,
   icon: Icon,
   invert,
   href,
@@ -75,6 +76,8 @@ export function KpiCard({
   value: ReactNode;
   delta?: number | null;
   deltaLabel?: ReactNode;
+  /** Пояснение под значением (когда нет сравнения с прошлым периодом) */
+  hint?: ReactNode;
   icon?: LucideIcon;
   /** Для «Отменено»: рост — плохо */
   invert?: boolean;
@@ -91,6 +94,7 @@ export function KpiCard({
       )}
       <p className="text-[13px] font-medium text-ink-600">{label}</p>
       <p className="mt-1.5 text-[26px] leading-none font-bold tracking-tight text-graphite">{value}</p>
+      {delta == null && hint && <p className="mt-2.5 text-[11.5px] leading-tight text-ink-400">{hint}</p>}
       {delta != null && (
         <p className="mt-2.5 text-[12px] leading-tight">
           <span className={cn("inline-flex items-center gap-0.5 font-semibold", good ? "text-sage-700" : "text-powder-700")}>
