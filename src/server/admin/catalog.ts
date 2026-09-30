@@ -63,7 +63,7 @@ export async function saveCategory(raw: z.infer<typeof categorySchema>, actor: A
     const existing = input.id ? await tx.category.findUnique({ where: { id: input.id }, include: { _count: { select: { children: true } } } }) : null;
     if (input.id && !existing) throw new DomainError("NOT_FOUND");
     // каталог двухуровневый: родителем может быть только категория верхнего уровня
-    let parentId = input.parentId || null;
+    const parentId = input.parentId || null;
     if (parentId) {
       const parent = await tx.category.findUnique({ where: { id: parentId } });
       if (!parent || parent.parentId || parent.id === existing?.id) throw new DomainError("VALIDATION", "Неверная родительская категория", { fieldErrors: { parentId: "invalid" } });
