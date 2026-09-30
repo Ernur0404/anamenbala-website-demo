@@ -12,6 +12,8 @@ type Options<T> = {
   success?: string | false;
   onSuccess?: (data: T) => void;
   onError?: (failure: Failure) => void;
+  /** Свой текст ошибки (например, по details.reason); undefined — стандартный перевод кода */
+  errorMessage?: (failure: Failure) => string | undefined;
 };
 
 /**
@@ -44,7 +46,7 @@ export function useAdminAction() {
               options.onSuccess?.(result.data);
             } else {
               setFieldErrors(result.fieldErrors ?? {});
-              toast.error(translate(result.code, result.error));
+              toast.error(options.errorMessage?.(result) ?? translate(result.code, result.error));
               options.onError?.(result);
             }
             resolve(result);
