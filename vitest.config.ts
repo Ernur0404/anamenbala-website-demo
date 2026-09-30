@@ -9,6 +9,7 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["tests/setup.ts"],
+    globalSetup: ["tests/global-setup.ts"],
     // интеграционные тесты работают с одной тестовой БД — без параллелизма между файлами
     fileParallelism: false,
     testTimeout: 30_000,

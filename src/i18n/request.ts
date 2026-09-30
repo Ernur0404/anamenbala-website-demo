@@ -14,8 +14,11 @@ async function loadMessages(locale: Locale) {
 }
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  let locale = await requestLocale;
-  if (!isLocale(locale)) {
+  const requested = await requestLocale;
+  let locale: Locale;
+  if (isLocale(requested)) {
+    locale = requested;
+  } else {
     // админка работает без префикса языка — язык берётся из профиля сотрудника (cookie)
     const fromCookie = (await cookies()).get(ADMIN_LOCALE_COOKIE)?.value;
     locale = isLocale(fromCookie) ? fromCookie : routing.defaultLocale;
