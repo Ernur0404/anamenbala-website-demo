@@ -89,7 +89,8 @@ describe("resolvePrice", () => {
 
   it("фиксированная скидка не уводит цену в минус", () => {
     expect(applyDiscount(1_000, "FIXED", 5_000)).toBe(0);
-    expect(applyDiscount(9_990, "PERCENT", 15)).toBe(8_492);
+    expect(applyDiscount(9_990, "PERCENT", 15)).toBe(8_490);
+    expect(applyDiscount(18_990, "PERCENT", 15)).toBe(16_140);
   });
 });
 

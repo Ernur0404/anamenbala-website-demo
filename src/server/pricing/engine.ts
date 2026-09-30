@@ -57,8 +57,12 @@ export function isActiveWindow(startsAt: Date | null | undefined, endsAt: Date |
   return true;
 }
 
+/** Процентная скидка округляется вниз до 10 ₸ (цена «красивая» и в пользу покупателя) */
 export function applyDiscount(amount: number, type: DiscountType, value: number): number {
-  if (type === "PERCENT") return Math.max(0, Math.round((amount * (100 - clamp(value, 0, 100))) / 100));
+  if (type === "PERCENT") {
+    const exact = (amount * (100 - clamp(value, 0, 100))) / 100;
+    return Math.max(0, Math.floor(exact / 10) * 10);
+  }
   return Math.max(0, amount - Math.max(0, value));
 }
 

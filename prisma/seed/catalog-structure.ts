@@ -48,7 +48,7 @@ export const ATTRIBUTES: {
     display: "CHIPS",
     axis: true,
     unit: "см",
-    values: [50, 56, 62, 68, 74, 80, 86, 92, 98, 104, 110, 116, 122, 128, 134, 140, 146, 152, 158, 164].map((n) => ({
+    values: [50, 56, 62, 68, 74, 80, 86, 92, 98, 100, 104, 110, 116, 120, 122, 128, 134, 140, 146, 152, 158, 164].map((n) => ({
       slug: String(n),
       ru: String(n),
       kk: String(n),

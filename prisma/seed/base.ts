@@ -20,7 +20,8 @@ export async function seedAttributes() {
       await db.attributeValue.upsert({
         where: { attributeId_slug: { attributeId: attribute.id, slug: v.slug } },
         create: { attributeId: attribute.id, slug: v.slug, valueRu: v.ru, valueKk: v.kk, colorHex: v.hex, sortOrder: i },
-        update: {},
+        // порядок значений из справочника (важно для размерных сеток при добавлении новых размеров)
+        update: { sortOrder: i },
       });
     }
   }
