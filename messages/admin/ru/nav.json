@@ -1,0 +1,15 @@
+{
+  "dashboard": "Главная",
+  "orders": "Заказы",
+  "pos": "Касса",
+  "products": "Товары",
+  "stock": "Склад",
+  "catalog": "Категории",
+  "promotions": "Акции",
+  "customers": "Клиенты",
+  "reviews": "Отзывы",
+  "content": "Баннеры / Контент",
+  "reports": "Отчёты",
+  "settings": "Настройки",
+  "profile": "Мой профиль"
+}

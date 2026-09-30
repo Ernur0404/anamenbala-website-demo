@@ -5,27 +5,46 @@ import { isLocale, routing, type Locale } from "./routing";
 export const ADMIN_LOCALE_COOKIE = "amb_admin_locale";
 export const STORE_TIME_ZONE = "Asia/Atyrau";
 
-async function loadMessages(locale: Locale) {
-  const [store, admin] = await Promise.all([
-    import(`../../messages/${locale}.json`),
-    import(`../../messages/admin-${locale}.json`),
-  ]);
-  return { ...store.default, admin: admin.default };
+/** Разделы переводов админки: messages/admin/{ru,kk}/<раздел>.json */
+export const ADMIN_NAMESPACES = [
+  "common",
+  "nav",
+  "auth",
+  "errors",
+  "profile",
+  "dashboard",
+  "orders",
+  "pos",
+  "products",
+  "stock",
+  "catalog",
+  "promotions",
+  "customers",
+  "reviews",
+  "content",
+  "reports",
+  "settings",
+] as const;
+
+async function loadStoreMessages(locale: Locale) {
+  return (await import(`../../messages/${locale}.json`)).default;
+}
+
+async function loadAdminMessages(locale: Locale) {
+  const entries = await Promise.all(
+    ADMIN_NAMESPACES.map(async (ns) => [ns, (await import(`../../messages/admin/${locale}/${ns}.json`)).default] as const),
+  );
+  return Object.fromEntries(entries);
 }
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
-  let locale: Locale;
   if (isLocale(requested)) {
-    locale = requested;
-  } else {
-    // админка работает без префикса языка — язык берётся из профиля сотрудника (cookie)
-    const fromCookie = (await cookies()).get(ADMIN_LOCALE_COOKIE)?.value;
-    locale = isLocale(fromCookie) ? fromCookie : routing.defaultLocale;
+    return { locale: requested, timeZone: STORE_TIME_ZONE, messages: await loadStoreMessages(requested) };
   }
-  return {
-    locale,
-    timeZone: STORE_TIME_ZONE,
-    messages: await loadMessages(locale),
-  };
+  // админка работает без префикса языка — язык берётся из профиля сотрудника (cookie)
+  const fromCookie = (await cookies()).get(ADMIN_LOCALE_COOKIE)?.value;
+  const locale: Locale = isLocale(fromCookie) ? fromCookie : routing.defaultLocale;
+  const [store, admin] = await Promise.all([loadStoreMessages(locale), loadAdminMessages(locale)]);
+  return { locale, timeZone: STORE_TIME_ZONE, messages: { ...store, admin } };
 });

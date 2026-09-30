@@ -19,7 +19,7 @@ export function DialogContent({
   hideTitle,
   size = "md",
   ...props
-}: ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { title: ReactNode; description?: ReactNode; hideTitle?: boolean; size?: "sm" | "md" | "lg" | "xl" }) {
+}: Omit<ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, "title"> & { title: ReactNode; description?: ReactNode; hideTitle?: boolean; size?: "sm" | "md" | "lg" | "xl" }) {
   const width = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" }[size];
   return (
     <DialogPrimitive.Portal>
@@ -54,7 +54,7 @@ export function SheetContent({
   side = "right",
   footer,
   ...props
-}: ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { title: ReactNode; side?: "right" | "left" | "bottom"; footer?: ReactNode }) {
+}: Omit<ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, "title"> & { title: ReactNode; side?: "right" | "left" | "bottom"; footer?: ReactNode }) {
   const position = {
     right: "inset-y-0 right-0 h-dvh w-[min(420px,92vw)] data-[state=open]:animate-slide-in-right",
     left: "inset-y-0 left-0 h-dvh w-[min(380px,88vw)] data-[state=open]:animate-slide-in-left",
