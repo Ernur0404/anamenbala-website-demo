@@ -30,7 +30,7 @@ export default async function SubscribersPage({ searchParams }: { searchParams: 
       <CustomersNav
         active="subscribers"
         actions={
-          <a href="/api/admin/export/subscribers" className={buttonVariants({ size: "sm", variant: "secondary" })}>
+          <a href="/api/admin/export/subscribers" download className={buttonVariants({ size: "sm", variant: "secondary" })}>
             <Download />
             {tc("exportExcel")}
           </a>

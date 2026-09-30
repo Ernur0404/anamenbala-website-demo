@@ -44,7 +44,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
-          <a href={exportHref} className={buttonVariants()}>
+          <a href={exportHref} download className={buttonVariants()}>
             <Download />
             {t("export")}
           </a>
