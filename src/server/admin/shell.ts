@@ -11,7 +11,7 @@ export async function getShellCounts(role: StaffRole) {
     can(role, "reviews") ? db.review.count({ where: { status: "PENDING" } }) : 0,
     can(role, "customers") ? db.contactMessage.count({ where: { status: "NEW" } }) : 0,
     can(role, "stock")
-      ? db.productVariant.count({ where: { isActive: true, stock: { lte: threshold }, product: { status: "PUBLISHED", allowBackorder: false } } })
+      ? db.productVariant.count({ where: { isActive: true, stock: { gt: 0, lte: threshold }, product: { status: "PUBLISHED" } } })
       : 0,
   ]);
   return { newOrders, pendingReviews, newMessages, lowStock };

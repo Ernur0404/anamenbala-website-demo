@@ -34,6 +34,8 @@ export function VariantPicker({
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const requestId = useRef(0);
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resultsFor = useRef("");
 
   const search = async (q: string) => {
     const id = ++requestId.current;
@@ -42,6 +44,7 @@ export function VariantPicker({
     if (id !== requestId.current) return null;
     setLoading(false);
     const list = res.ok ? res.data : [];
+    resultsFor.current = q;
     setResults(list);
     setActive(0);
     return list;
@@ -50,8 +53,10 @@ export function VariantPicker({
   useEffect(() => {
     const q = query.trim();
     if (q.length < 2) return;
-    const timer = setTimeout(() => void search(q), 250);
-    return () => clearTimeout(timer);
+    debounce.current = setTimeout(() => void search(q), 250);
+    return () => {
+      if (debounce.current) clearTimeout(debounce.current);
+    };
   }, [query]);
 
   useEffect(() => {
@@ -96,8 +101,9 @@ export function VariantPicker({
             e.preventDefault();
             const q = query.trim();
             if (!q) return;
-            // сканер: ищем сразу, не дожидаясь задержки
-            const list = shown.length && !loading ? shown : await search(q);
+            // сканер вводит код и сразу Enter: отменяем отложенный поиск и ищем немедленно
+            if (debounce.current) clearTimeout(debounce.current);
+            const list = shown.length && !loading && resultsFor.current === q ? shown : await search(q);
             if (!list) return;
             const exact = list.find((v) => v.barcode === q || v.sku.toLowerCase() === q.toLowerCase());
             if (exact) pick(exact);
