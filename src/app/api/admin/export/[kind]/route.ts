@@ -4,12 +4,13 @@ import { db } from "@/server/db";
 import { audit } from "@/server/audit";
 import { buildWorkbook, xlsxResponse } from "@/server/admin/xlsx";
 import { customerWhere, type CustomerFilter } from "@/server/admin/customers";
-import { toStoreDateKey } from "@/lib/dates";
+import { addDays, storeDayStart, toStoreDateKey } from "@/lib/dates";
+import { effectiveRange, topProducts } from "@/server/admin/reports";
 import { formatPhone } from "@/lib/phone";
 
 export const dynamic = "force-dynamic";
 
-const PERMISSIONS: Record<string, Permission> = { customers: "customers", subscribers: "customers" };
+const PERMISSIONS: Record<string, Permission> = { customers: "customers", subscribers: "customers", "report-products": "reports" };
 
 /** Выгрузка списков в Excel: /api/admin/export/customers?q=…&filter=…, /api/admin/export/subscribers */
 export async function GET(request: Request, { params }: { params: Promise<{ kind: string }> }) {
@@ -48,6 +49,32 @@ export async function GET(request: Request, { params }: { params: Promise<{ kind
     );
     await audit({ staffUserId: staff.id, action: "export.customers", entityType: "export", summary: `Выгрузка клиентов (${customers.length})` });
     return xlsxResponse(buffer, `klienty-${date}.xlsx`);
+  }
+
+  if (kind === "report-products") {
+    const f = url.searchParams.get("from");
+    const tt = url.searchParams.get("to");
+    const valid = (v: string | null) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
+    const { from, to } = await effectiveRange(valid(f) ? storeDayStart(valid(f)!) : null, valid(tt) ? addDays(storeDayStart(valid(tt)!), 1) : null);
+    const rows = await topProducts(from, to, 1000);
+    const buffer = await buildWorkbook(
+      "Товары",
+      [
+        { header: "Товар", width: 40, value: (r) => r.name },
+        { header: "Продано, шт.", width: 12, value: (r) => r.qty },
+        { header: "Заказов", width: 10, value: (r) => r.orders },
+        { header: "Выручка, ₸", width: 14, value: (r) => r.revenue, numFmt: "#,##0" },
+        ...(can(staff.role, "finance")
+          ? [
+              { header: "Себестоимость, ₸", width: 16, value: (r: (typeof rows)[number]) => r.cost, numFmt: "#,##0" },
+              { header: "Прибыль, ₸", width: 14, value: (r: (typeof rows)[number]) => r.profit, numFmt: "#,##0" },
+            ]
+          : []),
+      ],
+      rows,
+    );
+    await audit({ staffUserId: staff.id, action: "export.report_products", entityType: "export", summary: `Выгрузка отчёта по товарам (${rows.length})` });
+    return xlsxResponse(buffer, `otchet-tovary-${toStoreDateKey(from)}-${toStoreDateKey(addDays(to, -1))}.xlsx`);
   }
 
   const subscribers = await db.newsletterSubscriber.findMany({ orderBy: { createdAt: "desc" } });

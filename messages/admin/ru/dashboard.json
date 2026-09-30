@@ -1,1 +1,48 @@
-{}
+{
+  "title": "Главная панель",
+  "subtitle": "Общая информация о магазине",
+  "kpi": {
+    "orders": "Всего заказов",
+    "customers": "Новые клиенты",
+    "revenue": "Общая выручка",
+    "inStock": "Товаров в наличии"
+  },
+  "vsPrev": "к прошлому периоду",
+  "inStockHint": "опубликованных товаров",
+  "sales": "Динамика продаж",
+  "revenue": "Выручка",
+  "ordersCount": "Заказы",
+  "latestOrders": "Последние заказы",
+  "allOrders": "Все заказы",
+  "popular": "Популярные товары",
+  "allProducts": "Все товары",
+  "sold": "{count} шт.",
+  "newCustomers": "Новые клиенты",
+  "allCustomers": "Все клиенты",
+  "registered": "Дата",
+  "categories": "Статистика категорий",
+  "productsTotal": "{count, plural, one {товар} few {товара} other {товаров}}",
+  "other": "Другое",
+  "promoTitle": "Всё под контролем!",
+  "promoText": "Управляйте магазином легко и удобно",
+  "promoButton": "Перейти к товарам",
+  "quick": "Быстрые действия",
+  "quickActions": {
+    "addProduct": "Добавить товар",
+    "createPromo": "Создать акцию",
+    "viewOrders": "Просмотреть заказы",
+    "settings": "Настройки магазина",
+    "newOrder": "Новый заказ",
+    "pos": "Касса"
+  },
+  "noData": "Пока нет данных за этот период",
+  "attention": "Требует внимания",
+  "attentionItems": {
+    "newOrders": "Новых заказов: {count}",
+    "unpaid": "Ожидают оплаты: {count}",
+    "reviews": "Отзывов на модерации: {count}",
+    "lowStock": "Заканчиваются: {count}",
+    "messages": "Сообщений с сайта: {count}"
+  },
+  "allGood": "Всё в порядке — срочных дел нет"
+}

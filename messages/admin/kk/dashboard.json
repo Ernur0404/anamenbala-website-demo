@@ -1,1 +1,48 @@
-{}
+{
+  "title": "Басты панель",
+  "subtitle": "Дүкен туралы жалпы ақпарат",
+  "kpi": {
+    "orders": "Барлық тапсырыс",
+    "customers": "Жаңа клиенттер",
+    "revenue": "Жалпы түсім",
+    "inStock": "Қоймадағы тауарлар"
+  },
+  "vsPrev": "өткен кезеңге",
+  "inStockHint": "жарияланған тауар",
+  "sales": "Сатылым динамикасы",
+  "revenue": "Түсім",
+  "ordersCount": "Тапсырыстар",
+  "latestOrders": "Соңғы тапсырыстар",
+  "allOrders": "Барлық тапсырыстар",
+  "popular": "Танымал тауарлар",
+  "allProducts": "Барлық тауарлар",
+  "sold": "{count} дана",
+  "newCustomers": "Жаңа клиенттер",
+  "allCustomers": "Барлық клиенттер",
+  "registered": "Күні",
+  "categories": "Санаттар статистикасы",
+  "productsTotal": "тауар",
+  "other": "Басқа",
+  "promoTitle": "Бәрі бақылауда!",
+  "promoText": "Дүкенді оңай әрі ыңғайлы басқарыңыз",
+  "promoButton": "Тауарларға өту",
+  "quick": "Жылдам әрекеттер",
+  "quickActions": {
+    "addProduct": "Тауар қосу",
+    "createPromo": "Акция құру",
+    "viewOrders": "Тапсырыстарды қарау",
+    "settings": "Дүкен баптаулары",
+    "newOrder": "Жаңа тапсырыс",
+    "pos": "Касса"
+  },
+  "noData": "Бұл кезеңде әзірге дерек жоқ",
+  "attention": "Назар аударыңыз",
+  "attentionItems": {
+    "newOrders": "Жаңа тапсырыстар: {count}",
+    "unpaid": "Төлемді күтуде: {count}",
+    "reviews": "Модерациядағы пікірлер: {count}",
+    "lowStock": "Таусылып барады: {count}",
+    "messages": "Сайттан хабарламалар: {count}"
+  },
+  "allGood": "Бәрі жақсы — шұғыл істер жоқ"
+}
