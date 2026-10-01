@@ -26,7 +26,7 @@ type Session = { id: string; ip: string | null; userAgent: string | null; lastSe
 
 export function ProfileForms({ staff, sessions }: { staff: Staff; sessions: Session[] }) {
   return (
-    <div className="grid gap-5 xl:grid-cols-2">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
       <PersonalForm staff={staff} />
       <PasswordForm />
       <TwoFactorPanel enabled={staff.totpEnabled} />

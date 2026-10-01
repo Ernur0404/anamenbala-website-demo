@@ -148,8 +148,40 @@ export function ProductForm({ initial, options, finance, publishedLabel }: { ini
     </div>
   );
 
+  // на телефоне и планшете — одна строка кнопок в нижней панели
+  const mobileActions = (
+    <div>
+      {dirty && <p className="mb-2 text-center text-[12px] font-medium text-amber-700">{tc("unsaved")}</p>}
+      <div className="flex items-stretch gap-2.5">
+        {state.id ? (
+          <>
+            <Select value={status} onChange={(e) => setStatus(e.target.value as ProductStatusValue)} aria-label={t("fields.status")} wrapperClassName="w-[42%] max-w-48 shrink-0">
+              {(["PUBLISHED", "DRAFT", "HIDDEN"] as const).map((s) => (
+                <option key={s} value={s}>
+                  {t(`status.${s}`)}
+                </option>
+              ))}
+            </Select>
+            <Button className="min-w-0 flex-1 whitespace-normal leading-tight" loading={pending} disabled={!canSave} onClick={() => void save(status)}>
+              {t("saveChanges")}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="secondary" className="min-w-0 flex-1 whitespace-normal leading-tight" disabled={pending || !canSave} onClick={() => void save("DRAFT")}>
+              {t("saveDraft")}
+            </Button>
+            <Button className="min-w-0 flex-1 whitespace-normal leading-tight" loading={pending} disabled={!canSave} onClick={() => void save("PUBLISHED")}>
+              {t("publish")}
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="grid items-start gap-5 pb-24 xl:grid-cols-[minmax(0,1fr)_340px] xl:pb-0">
+    <div className="grid grid-cols-1 items-start gap-5 pb-24 xl:grid-cols-[minmax(0,1fr)_340px] xl:pb-0">
       <div className="min-w-0 space-y-5">
         {/* основное */}
         <Panel title={t("sections.main")}>
@@ -333,7 +365,7 @@ export function ProductForm({ initial, options, finance, publishedLabel }: { ini
 
       {/* кнопки сохранения на телефоне и планшете */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 px-4 py-3 shadow-pop backdrop-blur xl:hidden">
-        <div className="mx-auto flex max-w-3xl items-center gap-2.5 [&>div]:flex [&>div]:w-full [&>div]:items-end [&>div]:gap-2.5 [&>div]:space-y-0">{actions}</div>
+        <div className="mx-auto max-w-3xl">{mobileActions}</div>
       </div>
     </div>
   );

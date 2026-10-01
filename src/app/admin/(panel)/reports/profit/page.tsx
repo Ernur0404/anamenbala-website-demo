@@ -44,7 +44,7 @@ export default async function ProfitReportPage({ searchParams }: { searchParams:
       <p className="mt-4 max-w-3xl text-[12.5px] leading-relaxed text-ink-500">
         {t("profitNote")} {cur.revenueWithoutCost > 0 && t("withoutCost", { amount: formatMoney(cur.revenueWithoutCost) })}
       </p>
-      <div className="mt-5 grid items-start gap-5 xl:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 items-start gap-5 xl:grid-cols-2">
         <Panel title={t("byCategory")} padded={false}>
           <DataTable minWidth={520}>
             <thead className="bg-cream/60">

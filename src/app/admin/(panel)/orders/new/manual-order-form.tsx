@@ -99,7 +99,7 @@ export function ManualOrderForm({
     );
 
   return (
-    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="min-w-0 space-y-5">
         <Panel title={t("manual.customer")}>
           <div className="grid gap-4 sm:grid-cols-2">

@@ -58,7 +58,7 @@ export function StockDocumentEditor({ doc, finance }: { doc: Doc; finance: boole
   const totalQty = lines.reduce((s, l) => s + l.quantity, 0);
 
   return (
-    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
       <Panel title={t("lines")} padded={false}>
         {!readOnly && (
           <div className="px-5 pb-4 sm:px-6">

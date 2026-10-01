@@ -23,7 +23,7 @@ export default async function AdminRootLayout({ children }: { children: ReactNod
   const messages = (await getMessages()) as Record<string, unknown>;
   return (
     <html lang={locale} className={fontVariables} data-scroll-behavior="smooth">
-      <body>
+      <body className="admin-ui">
         <NextIntlClientProvider locale={locale} messages={{ admin: messages.admin, common: messages.common } as never}>
           {children}
         </NextIntlClientProvider>

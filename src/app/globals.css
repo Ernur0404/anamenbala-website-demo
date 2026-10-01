@@ -173,6 +173,13 @@
     display: none;
   }
 
+  /* Админка: тонкие полосы прокрутки у таблиц, списков и меню */
+  /* :where — нулевая специфичность, чтобы .scrollbar-none продолжал скрывать полосы */
+  :where(.admin-ui, .admin-ui *) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+
   /* Текст из редактора (описания товаров, страницы) */
   .rich-text {
     color: var(--color-ink-700);

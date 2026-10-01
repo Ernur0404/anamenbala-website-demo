@@ -8,9 +8,10 @@ const SAGE = "#587e63";
 const SAGE_LIGHT = "#abc7b3";
 const PALETTE = ["#587e63", "#95b89f", "#c5ab85", "#e8b8b8", "#dac8ab", "#abc7b3", "#bb6f6f"];
 
-function shortMoney(v: number) {
-  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(v >= 10_000_000 ? 0 : 1).replace(".0", "")} млн`;
-  if (v >= 1000) return `${Math.round(v / 1000)} тыс`;
+/** Короткие суммы на оси графика: «1,5 млн», «250 тыс» / «250 мың» */
+function shortMoney(v: number, locale: string) {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(v >= 10_000_000 ? 0 : 1).replace(".0", "").replace(".", ",")} млн`;
+  if (v >= 1000) return `${Math.round(v / 1000)} ${locale === "kk" ? "мың" : "тыс"}`;
   return String(v);
 }
 
@@ -38,7 +39,7 @@ export function SalesChart({ points, bucket, height = 280 }: { points: { key: st
           </defs>
           <CartesianGrid vertical={false} stroke="#ebe5da" strokeDasharray="0" />
           <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#737974" }} minTickGap={16} />
-          <YAxis yAxisId="revenue" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#737974" }} tickFormatter={shortMoney} width={56} />
+          <YAxis yAxisId="revenue" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#737974" }} tickFormatter={(v: number) => shortMoney(v, locale)} width={56} />
           <YAxis yAxisId="orders" orientation="right" hide allowDecimals={false} />
           <Tooltip
             contentStyle={{ borderRadius: 10, border: "1px solid #ebe5da", boxShadow: "0 12px 32px -14px rgb(47 52 48 / 0.3)", fontSize: 12 }}

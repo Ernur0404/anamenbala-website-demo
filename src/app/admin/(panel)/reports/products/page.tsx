@@ -32,7 +32,7 @@ export default async function ProductsReportPage({ searchParams }: { searchParam
     <>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <ReportsNav active="products" sp={sp} period={period} finance={canSeeFinance(staff.role)} exportHref={exportHref} />
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Panel title={t("topProducts")} padded={false}>
           <DataTable minWidth={620}>
             <thead className="bg-cream/60">

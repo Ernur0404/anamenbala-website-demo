@@ -118,7 +118,8 @@ export function ImageField({
     }
   };
   if (!value) {
-    if (!compact) return <DropZone onFiles={upload} busy={busy} hint={hint} className={cn(aspect, "min-h-32", className)} />;
+    // без min-h: пропорция + минимальная высота не дали бы полю сжаться на телефоне (а под содержимое оно растёт само)
+    if (!compact) return <DropZone onFiles={upload} busy={busy} hint={hint} className={cn(aspect, "w-full", className)} />;
     return (
       <DropZone onFiles={upload} busy={busy} className={cn(aspect, "p-2", className)}>
         <span className="grid size-9 place-items-center rounded-full bg-white text-sage-700 shadow-soft">{busy ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}</span>

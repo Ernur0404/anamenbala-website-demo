@@ -34,7 +34,7 @@ export default async function CustomersReportPage({ searchParams }: { searchPara
         <KpiCard icon={ShoppingBag} label={t("kpi.customersWithOrders")} value={stats.buyers} />
         <KpiCard icon={Repeat} label={t("kpi.returning")} value={stats.returning} />
       </div>
-      <div className="mt-5 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="mt-5 grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Panel title={t("topCustomers")} padded={false}>
           <DataTable minWidth={520}>
             <thead className="bg-cream/60">

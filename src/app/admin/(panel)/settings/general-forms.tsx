@@ -66,7 +66,7 @@ export function GeneralForm({
           </Field>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {(["logo", "favicon"] as const).map((key) => (
             <div key={key} className="flex items-center gap-4">
               <div className="w-24 shrink-0">

@@ -117,7 +117,7 @@ export function PageForm({ initial, path }: { initial: Form; path: string | null
   );
 
   return (
-    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="min-w-0 space-y-5">
         {(form.template === "DELIVERY" || form.template === "CONTACTS" || form.template === "FAQ") && (
           <p className="flex items-start gap-2 rounded-xl bg-sage-50 px-4 py-3 text-[13px] text-sage-900">

@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Accordion as AccordionPrimitive, Dialog as DialogPrimitive, Switch as SwitchPrimitive, Tabs as TabsPrimitive, Tooltip as TooltipPrimitive } from "radix-ui";
 import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ export function DialogContent({
   ...props
 }: Omit<ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, "title"> & { title: ReactNode; description?: ReactNode; hideTitle?: boolean; size?: "sm" | "md" | "lg" | "xl" }) {
   const width = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" }[size];
+  const tc = useTranslations("common");
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-graphite/40 backdrop-blur-[2px] data-[state=open]:animate-fade-in" />
@@ -38,7 +40,7 @@ export function DialogContent({
         </div>
         {!description && <DialogPrimitive.Description className="sr-only">{typeof title === "string" ? title : ""}</DialogPrimitive.Description>}
         {children}
-        <DialogPrimitive.Close className="absolute top-4 right-4 grid size-9 place-items-center rounded-full text-ink-500 transition-colors hover:bg-beige-100 hover:text-graphite" aria-label="Закрыть">
+        <DialogPrimitive.Close className="absolute top-4 right-4 grid size-9 place-items-center rounded-full text-ink-500 transition-colors hover:bg-beige-100 hover:text-graphite" aria-label={tc("close")}>
           <X className="size-5" />
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
@@ -60,6 +62,7 @@ export function SheetContent({
     left: "inset-y-0 left-0 h-dvh w-[min(380px,88vw)] data-[state=open]:animate-slide-in-left",
     bottom: "inset-x-0 bottom-0 max-h-[88dvh] w-full rounded-t-2xl data-[state=open]:animate-slide-up",
   }[side];
+  const tc = useTranslations("common");
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-graphite/40 data-[state=open]:animate-fade-in" />
@@ -68,7 +71,7 @@ export function SheetContent({
         <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
           <DialogPrimitive.Title className="heading-section text-2xl">{title}</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">{typeof title === "string" ? title : ""}</DialogPrimitive.Description>
-          <DialogPrimitive.Close className="grid size-9 place-items-center rounded-full text-ink-500 hover:bg-beige-100 hover:text-graphite" aria-label="Закрыть">
+          <DialogPrimitive.Close className="grid size-9 place-items-center rounded-full text-ink-500 hover:bg-beige-100 hover:text-graphite" aria-label={tc("close")}>
             <X className="size-5" />
           </DialogPrimitive.Close>
         </div>

@@ -54,7 +54,7 @@ export default async function SalesReportPage({ searchParams }: { searchParams: 
       <Panel title={bucket === "day" ? t("byDay") : bucket === "week" ? t("byWeek") : t("byMonth")} className="mt-5">
         {series.some((p) => p.orders > 0) ? <SalesChart points={series} bucket={bucket} height={300} /> : <p className="py-16 text-center text-sm text-ink-500">{t("empty")}</p>}
       </Panel>
-      <div className="mt-5 grid gap-5 xl:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
         <ShareTable title={t("byChannel")} labels={cols} empty={t("empty")} rows={parts.channels.map((c) => ({ label: t(`channel.${c.key}` as "channel.WEBSITE"), orders: c.orders, revenue: c.revenue }))} />
         <ShareTable title={t("byPayment")} labels={cols} empty={t("empty")} rows={parts.payments.map((c) => ({ label: c.key ?? t("noPayment"), orders: c.orders, revenue: c.revenue }))} />
         <ShareTable title={t("byDelivery")} labels={cols} empty={t("empty")} rows={parts.deliveries.map((c) => ({ label: c.key ?? t("noDelivery"), orders: c.orders, revenue: c.revenue }))} />

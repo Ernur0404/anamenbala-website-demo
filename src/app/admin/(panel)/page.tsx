@@ -91,9 +91,30 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         {series.some((p) => p.orders > 0) ? <SalesChart points={series} bucket={bucket} /> : <p className="py-16 text-center text-sm text-ink-500">{t("noData")}</p>}
       </Panel>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Panel title={t("latestOrders")} padded={false} action={<Link href="/admin/orders" className="flex items-center gap-1 text-[12.5px] font-semibold text-sage-700 hover:underline">{t("allOrders")} <ArrowRight className="size-3.5" /></Link>}>
-          <table className="w-full text-[13px]">
+          {/* телефон: две строки на заказ */}
+          <ul className="text-[13px] sm:hidden">
+            {data.latest.map((o) => (
+              <li key={o.id} className="border-t border-line first:border-t-0">
+                <Link href={`/admin/orders/${o.id}`} className="flex items-center gap-3 px-5 py-3">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">
+                      <span className="font-bold text-graphite">#{o.number}</span> <span className="text-ink-700">{o.customerName}</span>
+                    </span>
+                    <span className="block text-[12px] text-ink-500">{formatDate(o.createdAt, locale)}</span>
+                  </span>
+                  <span className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="font-semibold whitespace-nowrap text-graphite">{formatMoney(o.total)}</span>
+                    <StatusPill tone={labels.order[o.status].tone} className="px-2 py-0.5 text-[11px]">
+                      {labels.order[o.status].label}
+                    </StatusPill>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <table className="hidden w-full text-[13px] sm:table">
             <tbody>
               {data.latest.map((o) => (
                 <tr key={o.id} className="border-t border-line first:border-t-0">
@@ -135,7 +156,20 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </Panel>
 
         <Panel title={t("newCustomers")} padded={false} action={<Link href="/admin/customers" className="flex items-center gap-1 text-[12.5px] font-semibold text-sage-700 hover:underline">{t("allCustomers")} <ArrowRight className="size-3.5" /></Link>}>
-          <table className="w-full text-[13px]">
+          <ul className="text-[13px] sm:hidden">
+            {data.newest.map((c) => (
+              <li key={c.id} className="border-t border-line first:border-t-0">
+                <Link href={`/admin/customers/${c.id}`} className="flex items-center gap-3 px-5 py-3">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-graphite">{c.name}</span>
+                    <span className="block text-[12px] whitespace-nowrap text-ink-500">{formatPhone(c.phone)}</span>
+                  </span>
+                  <span className="shrink-0 text-[12px] whitespace-nowrap text-ink-500">{formatDate(c.createdAt, locale)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <table className="hidden w-full text-[13px] sm:table">
             <tbody>
               {data.newest.map((c) => (
                 <tr key={c.id} className="border-t border-line first:border-t-0">

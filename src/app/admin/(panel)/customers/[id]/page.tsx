@@ -62,7 +62,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
         }
       />
 
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-5">
           <Panel title={t("card.stats")}>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

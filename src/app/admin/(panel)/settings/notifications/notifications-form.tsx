@@ -264,7 +264,11 @@ export function NotificationsForm({
         }
         subtitle={t("customerEmailsHint")}
         serif
-        action={<StatusPill tone={smtp ? "sage" : "amber"} dot>{smtp ? t("smtpOk") : t("smtpMissing")}</StatusPill>}
+        action={
+          <StatusPill tone={smtp ? "sage" : "amber"} dot className="whitespace-normal">
+            {smtp ? t("smtpOk") : t("smtpMissing")}
+          </StatusPill>
+        }
       >
         <div className="space-y-5">
           <div className="grid gap-2.5 sm:grid-cols-2">
