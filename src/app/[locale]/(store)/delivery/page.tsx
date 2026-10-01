@@ -6,7 +6,7 @@ import { getDeliveryMethods, getFaq, getPage, getPaymentMethods } from "@/server
 import { toImage } from "@/server/catalog/cards";
 import { PageHero } from "@/components/store/page-hero";
 import { TrustRow } from "@/components/store/home/sections";
-import { DynamicIcon, KaspiBadge } from "@/components/ui/icons";
+import { DynamicIcon, KaspiMark } from "@/components/ui/icons";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/primitives";
 import { formatMoney } from "@/lib/money";
 import { pickLocale, tr, trOrNull, type Locale } from "@/lib/l10n";
@@ -94,7 +94,7 @@ export default async function DeliveryPage({ params }: { params: Promise<{ local
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {payments.map((p) => (
             <article key={p.id} className="rounded-xl border border-line bg-white p-5">
-              <span className="grid size-11 place-items-center rounded-lg bg-beige-50 text-sage-700">{p.kind === "KASPI" ? <KaspiBadge label="Kaspi" className="border-0 bg-transparent px-0" /> : <Wallet className="size-5" />}</span>
+              <span className="grid size-11 place-items-center rounded-lg bg-beige-50 text-sage-700">{p.kind === "KASPI" ? <KaspiMark /> : <Wallet className="size-5" />}</span>
               <h3 className="mt-3 font-bold">{tr(p, "name", locale)}</h3>
               {trOrNull(p, "description", locale) && <p className="mt-1 text-sm text-ink-600">{tr(p, "description", locale)}</p>}
             </article>

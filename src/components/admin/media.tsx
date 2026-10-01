@@ -94,12 +94,15 @@ export function ImageField({
   aspect = "aspect-[16/9]",
   hint,
   className,
+  compact,
 }: {
   value: { id: string; url: string | null } | null;
   onChange: (value: { id: string; url: string | null } | null) => void;
   aspect?: string;
   hint?: ReactNode;
   className?: string;
+  /** Маленькое поле (логотип, иконка): без текста, кнопки-иконки */
+  compact?: boolean;
 }) {
   const t = useTranslations("admin.common");
   const [busy, setBusy] = useState(false);
@@ -114,17 +117,33 @@ export function ImageField({
       setBusy(false);
     }
   };
-  if (!value) return <DropZone onFiles={upload} busy={busy} hint={hint} className={cn(aspect, "min-h-32", className)} />;
+  if (!value) {
+    if (!compact) return <DropZone onFiles={upload} busy={busy} hint={hint} className={cn(aspect, "min-h-32", className)} />;
+    return (
+      <DropZone onFiles={upload} busy={busy} className={cn(aspect, "p-2", className)}>
+        <span className="grid size-9 place-items-center rounded-full bg-white text-sage-700 shadow-soft">{busy ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}</span>
+        <span className="sr-only">{t("upload")}</span>
+      </DropZone>
+    );
+  }
   return (
     <div className={cn("group relative overflow-hidden rounded-xl border border-line bg-beige-50", aspect, className)}>
       {value.url && (
         // eslint-disable-next-line @next/next/no-img-element -- превью в админке
-        <img src={value.url} alt="" className="size-full object-cover" />
+        <img src={value.url} alt="" className={cn("size-full", compact ? "object-contain p-1.5" : "object-cover")} />
       )}
-      <div className="absolute inset-x-0 bottom-0 flex justify-end gap-2 bg-gradient-to-t from-graphite/60 to-transparent p-2.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-        <label className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md bg-white px-3 text-[12.5px] font-semibold text-graphite shadow-soft hover:bg-sage-50">
+      <div
+        className={cn(
+          "absolute inset-x-0 bottom-0 flex gap-2 bg-gradient-to-t from-graphite/60 to-transparent opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
+          compact ? "justify-center gap-1.5 p-1.5" : "justify-end p-2.5",
+        )}
+      >
+        <label
+          className={cn("inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md bg-white text-[12.5px] font-semibold text-graphite shadow-soft hover:bg-sage-50", compact ? "w-8 justify-center" : "px-3")}
+          title={compact ? t("replace") : undefined}
+        >
           {busy ? <LoaderCircle className="size-3.5 animate-spin" /> : <ImagePlus className="size-3.5" />}
-          {t("replace")}
+          <span className={compact ? "sr-only" : undefined}>{t("replace")}</span>
           <input
             type="file"
             accept="image/*"
@@ -136,9 +155,14 @@ export function ImageField({
             }}
           />
         </label>
-        <button type="button" onClick={() => onChange(null)} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white px-3 text-[12.5px] font-semibold text-powder-800 shadow-soft hover:bg-powder-50">
+        <button
+          type="button"
+          onClick={() => onChange(null)}
+          className={cn("inline-flex h-8 items-center gap-1.5 rounded-md bg-white text-[12.5px] font-semibold text-powder-800 shadow-soft hover:bg-powder-50", compact ? "w-8 justify-center" : "px-3")}
+          title={compact ? t("remove") : undefined}
+        >
           <Trash className="size-3.5" />
-          {t("remove")}
+          <span className={compact ? "sr-only" : undefined}>{t("remove")}</span>
         </button>
       </div>
     </div>

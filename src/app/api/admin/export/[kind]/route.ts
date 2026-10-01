@@ -6,11 +6,12 @@ import { buildWorkbook, xlsxResponse } from "@/server/admin/xlsx";
 import { customerWhere, type CustomerFilter } from "@/server/admin/customers";
 import { addDays, storeDayStart, toStoreDateKey } from "@/lib/dates";
 import { effectiveRange, topProducts } from "@/server/admin/reports";
+import { exportOrders, exportProducts } from "@/server/admin/import-export";
 import { formatPhone } from "@/lib/phone";
 
 export const dynamic = "force-dynamic";
 
-const PERMISSIONS: Record<string, Permission> = { customers: "customers", subscribers: "customers", "report-products": "reports" };
+const PERMISSIONS: Record<string, Permission> = { customers: "customers", subscribers: "customers", "report-products": "reports", products: "import", orders: "import" };
 
 /** Выгрузка списков в Excel: /api/admin/export/customers?q=…&filter=…, /api/admin/export/subscribers */
 export async function GET(request: Request, { params }: { params: Promise<{ kind: string }> }) {
@@ -49,6 +50,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ kind
     );
     await audit({ staffUserId: staff.id, action: "export.customers", entityType: "export", summary: `Выгрузка клиентов (${customers.length})` });
     return xlsxResponse(buffer, `klienty-${date}.xlsx`);
+  }
+
+  if (kind === "products") {
+    const buffer = await exportProducts({ ...staff, ip: null });
+    return xlsxResponse(buffer, "tovary-" + date + ".xlsx");
+  }
+
+  if (kind === "orders") {
+    const re = /^\d{4}-\d{2}-\d{2}$/;
+    const f = url.searchParams.get("from");
+    const tt = url.searchParams.get("to");
+    const { from, to } = await effectiveRange(f && re.test(f) ? storeDayStart(f) : null, tt && re.test(tt) ? addDays(storeDayStart(tt), 1) : null);
+    const buffer = await exportOrders(from, to, { ...staff, ip: null });
+    return xlsxResponse(buffer, "zakazy-" + toStoreDateKey(from) + "-" + toStoreDateKey(addDays(to, -1)) + ".xlsx");
   }
 
   if (kind === "report-products") {

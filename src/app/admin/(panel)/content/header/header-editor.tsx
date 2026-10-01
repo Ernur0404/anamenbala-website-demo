@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/form";
-import { DynamicIcon, ICON_KEYS } from "@/components/ui/icons";
+import { Input } from "@/components/ui/form";
+import { DynamicIcon } from "@/components/ui/icons";
+import { IconSelect } from "@/components/admin/icon-select";
 import { Panel } from "@/components/admin/ui";
 import { useAdminAction } from "@/components/admin/use-action";
 import { saveAdvantagesAction, saveTopbarAction } from "@/server/actions/admin/content";
@@ -13,23 +14,6 @@ import { saveAdvantagesAction, saveTopbarAction } from "@/server/actions/admin/c
 type L = { ru: string; kk: string };
 type TopItem = { icon: string; text: L };
 type AdvItem = { icon: string; title: L; text: L };
-
-function IconSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-sage-50 text-sage-700">
-        <DynamicIcon name={value} size={18} />
-      </span>
-      <Select value={value} onChange={(e) => onChange(e.target.value)} className="h-10 text-[13px]" wrapperClassName="w-36">
-        {ICON_KEYS.map((k) => (
-          <option key={k} value={k}>
-            {k}
-          </option>
-        ))}
-      </Select>
-    </div>
-  );
-}
 
 export function HeaderEditor({ topbar, advantages }: { topbar: TopItem[]; advantages: AdvItem[] }) {
   const t = useTranslations("admin.content.header");

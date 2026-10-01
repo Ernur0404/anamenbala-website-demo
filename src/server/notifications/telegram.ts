@@ -43,12 +43,14 @@ export async function discoverTelegramChats(token: string): Promise<{ botName: s
   if (!me.ok) throw new Error("Неверный токен бота");
   const meJson = (await me.json()) as { result?: { username?: string } };
   const updates = await fetch(`https://api.telegram.org/bot${token}/getUpdates?limit=50`, { signal: AbortSignal.timeout(10_000) });
+  type Chat = { id: number; title?: string; first_name?: string; last_name?: string; username?: string };
   const updatesJson = (await updates.json()) as {
-    result?: Array<{ message?: { chat?: { id: number; title?: string; first_name?: string; last_name?: string; username?: string } } }>;
+    result?: Array<{ message?: { chat?: Chat }; channel_post?: { chat?: Chat }; my_chat_member?: { chat?: Chat } }>;
   };
   const chats = new Map<string, string>();
   for (const update of updatesJson.result ?? []) {
-    const chat = update.message?.chat;
+    // личное сообщение боту, сообщение в группе/канале или добавление бота в группу
+    const chat = update.message?.chat ?? update.channel_post?.chat ?? update.my_chat_member?.chat;
     if (!chat) continue;
     const title = chat.title ?? ([chat.first_name, chat.last_name].filter(Boolean).join(" ") || chat.username || String(chat.id));
     chats.set(String(chat.id), title);

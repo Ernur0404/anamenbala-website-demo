@@ -116,6 +116,15 @@ export function KaspiBadge({ label = "Kaspi", className }: { label?: string; cla
   );
 }
 
+/** Знак Kaspi для квадратных плиток (без подписи) */
+export function KaspiMark({ className }: { className?: string }) {
+  return (
+    <span role="img" aria-label="Kaspi" className={`grid size-6 place-items-center rounded-md bg-[#e4312b] text-[13px] font-black text-white ${className ?? ""}`}>
+      K
+    </span>
+  );
+}
+
 export function StrollerIcon({ size = 20, ...props }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden {...props}>
