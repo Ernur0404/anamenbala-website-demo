@@ -29,3 +29,7 @@ coverage/
 Thumbs.db
 .vscode/
 .idea/
+
+# продакшн: секреты и бэкапы на сервере
+deploy/.env
+deploy/backups/

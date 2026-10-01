@@ -1,0 +1,35 @@
+# HTTPS-сертификат Let's Encrypt выпускается и продлевается автоматически.
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# фоновые задачи вызываются только изнутри (cron → app:3000), снаружи их нет
+	handle /api/cron/* {
+		respond 404
+	}
+
+	# загруженные фото и видео — напрямую с диска, с долгим кэшем (имена файлов не меняются)
+	handle /uploads/* {
+		uri strip_prefix /uploads
+		root * /srv/uploads
+		header Cache-Control "public, max-age=31536000, immutable"
+		header X-Content-Type-Options "nosniff"
+		file_server
+	}
+
+	handle {
+		reverse_proxy app:3000
+	}
+}
+
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}

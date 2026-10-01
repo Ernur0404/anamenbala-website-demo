@@ -1,0 +1,7 @@
+# скрипты и конфиги для Linux-сервера — всегда с переводами строк LF
+*.sh text eol=lf
+Dockerfile text eol=lf
+deploy/Caddyfile text eol=lf
+deploy/cron/crontab text eol=lf
+deploy/cron/Dockerfile text eol=lf
+*.yml text eol=lf

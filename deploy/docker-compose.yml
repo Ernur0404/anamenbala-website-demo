@@ -1,0 +1,148 @@
+# Продакшн: приложение + PostgreSQL 18 + Caddy (HTTPS) + cron (фоновые задачи и бэкапы).
+# Запуск из папки deploy:  cp .env.example .env  →  заполнить  →  docker compose up -d --build
+# Подробно: docs/DEPLOY.md
+name: ana-men-bala
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-database-url: &database-url postgresql://${POSTGRES_USER:-anamenbala}:${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в deploy/.env}@db:5432/${POSTGRES_DB:-anamenbala}
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-anamenbala}
+      POSTGRES_USER: ${POSTGRES_USER:-anamenbala}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в deploy/.env}
+      # builtin C.UTF-8 — как в разработке: стабильные индексы при обновлениях ОС, корректный lower() для кириллицы
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C --locale-provider=builtin --builtin-locale=C.UTF-8"
+      TZ: ${TZ:-Asia/Atyrau}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    shm_size: 256mb
+    logging: *logging
+
+  # миграции базы — выполняются при каждом запуске перед приложением
+  migrate:
+    build:
+      context: ..
+      target: tools
+    image: ana-men-bala/tools:latest
+    command: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    logging: *logging
+
+  app:
+    build:
+      context: ..
+      target: runner
+    image: ana-men-bala/app:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: *database-url
+      APP_URL: ${APP_URL:?Задайте APP_URL в deploy/.env}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Задайте ENCRYPTION_KEY в deploy/.env}
+      CRON_SECRET: ${CRON_SECRET:?Задайте CRON_SECRET в deploy/.env}
+      SMTP_URL: ${SMTP_URL:-}
+      MAIL_FROM: ${MAIL_FROM:-Ана мен бала <no-reply@localhost>}
+      STORAGE_DRIVER: local
+      UPLOAD_DIR: /app/storage/uploads
+      TZ: ${TZ:-Asia/Atyrau}
+    volumes:
+      - uploads:/app/storage/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+    logging: *logging
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Задайте DOMAIN в deploy/.env}
+      ACME_EMAIL: ${ACME_EMAIL:?Задайте ACME_EMAIL в deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - uploads:/srv/uploads:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    logging: *logging
+
+  # фоновые задачи приложения, ежедневные бэкапы и их проверка (расписание — deploy/cron/crontab)
+  cron:
+    build: ./cron
+    image: ana-men-bala/cron:latest
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-anamenbala}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в deploy/.env}
+      PGDATABASE: ${POSTGRES_DB:-anamenbala}
+      CRON_SECRET: ${CRON_SECRET:?Задайте CRON_SECRET в deploy/.env}
+      APP_INTERNAL_URL: http://app:3000
+      BACKUP_KEEP_DAILY: ${BACKUP_KEEP_DAILY:-14}
+      BACKUP_KEEP_WEEKLY: ${BACKUP_KEEP_WEEKLY:-8}
+      TZ: ${TZ:-Asia/Atyrau}
+    volumes:
+      - uploads:/uploads:ro
+      - ./backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+
+  # служебные команды: docker compose run --rm tools npm run create-owner -- email@example.kz "Имя"
+  tools:
+    image: ana-men-bala/tools:latest
+    profiles: ["tools"]
+    environment:
+      DATABASE_URL: *database-url
+      APP_URL: ${APP_URL:?Задайте APP_URL в deploy/.env}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Задайте ENCRYPTION_KEY в deploy/.env}
+      CRON_SECRET: ${CRON_SECRET:?Задайте CRON_SECRET в deploy/.env}
+      UPLOAD_DIR: /app/storage/uploads
+    volumes:
+      - uploads:/app/storage/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+
+volumes:
+  pgdata:
+    name: ana-men-bala-pgdata
+  uploads:
+    name: ana-men-bala-uploads
+  caddy_data:
+    name: ana-men-bala-caddy-data
+  caddy_config:
+    name: ana-men-bala-caddy-config

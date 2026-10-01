@@ -1,0 +1,16 @@
+# Расписание (часовой пояс — TZ из deploy/.env, по умолчанию Asia/Atyrau). Вывод — в лог контейнера:
+#   docker compose logs -f cron
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/postgresql/18/bin
+
+# m   h  dom mon dow user command
+# уведомления (Telegram, email): отправка и повторы
+*     *  *   *   *   root . /etc/cron.env; /scripts/task.sh notifications >> /proc/1/fd/1 2>&1
+# начало и конец акций → цены в каталоге
+*/5   *  *   *   *   root . /etc/cron.env; /scripts/task.sh reprice >> /proc/1/fd/1 2>&1
+# очистка: просроченные сессии, старые корзины, неиспользуемые фото
+15    4  *   *   *   root . /etc/cron.env; /scripts/task.sh cleanup >> /proc/1/fd/1 2>&1
+# резервная копия базы и фото
+30    2  *   *   *   root . /etc/cron.env; /scripts/backup.sh >> /proc/1/fd/1 2>&1
+# проверка последней копии восстановлением во временную базу (по понедельникам)
+30    5  *   *   1   root . /etc/cron.env; /scripts/restore-check.sh >> /proc/1/fd/1 2>&1

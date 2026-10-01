@@ -1,0 +1,24 @@
+# зависимости и сборки ставятся заново внутри образа
+node_modules
+.next
+src/generated
+*.tsbuildinfo
+next-env.d.ts
+
+# локальные данные, секреты, бэкапы
+.data
+storage
+.env
+.env.*
+!.env.example
+deploy/.env
+deploy/backups
+
+# прочее
+.git
+.vscode
+coverage
+tests
+*.log
+Thumbs.db
+.DS_Store
