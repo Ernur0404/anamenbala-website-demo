@@ -4,6 +4,7 @@ import { ShoppingBag } from "lucide-react";
 import { getCartView } from "@/server/cart-view";
 import { getSectionProducts } from "@/server/content";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
+import { MobileTitleBar } from "@/components/store/mobile-title-bar";
 import { CartClient } from "@/components/store/cart/cart-client";
 import { ProductsSection } from "@/components/store/home/sections";
 import { EmptyState } from "@/components/ui/display";
@@ -23,9 +24,10 @@ export default async function CartPage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <div className="container-page pt-4 sm:pt-6">
-        <Breadcrumbs items={[{ label: t("common.home"), href: "/" }, { label: t("cart.title") }]} className="mb-3" />
-        <h1 className="heading-display mb-6 text-[40px] sm:text-[52px]">{t("cart.title")}</h1>
+      <MobileTitleBar title={t("cart.title")} backHref="/" />
+      <div className="container-page pt-2 lg:pt-6">
+        <Breadcrumbs items={[{ label: t("common.home"), href: "/" }, { label: t("cart.title") }]} className="mb-3 hidden lg:block" />
+        <h1 className="heading-display mb-6 hidden text-[52px] lg:block">{t("cart.title")}</h1>
         {cart ? (
           <CartClient cart={cart} />
         ) : (

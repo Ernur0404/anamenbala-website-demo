@@ -9,7 +9,7 @@ import { searchSuggestAction, type SearchSuggestion } from "@/server/actions/sto
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
-export function SearchBox({ className, initialQuery = "" }: { className?: string; initialQuery?: string }) {
+export function SearchBox({ className, initialQuery = "", autoFocus, onNavigate }: { className?: string; initialQuery?: string; autoFocus?: boolean; onNavigate?: () => void }) {
   const t = useTranslations("search");
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
@@ -44,6 +44,7 @@ export function SearchBox({ className, initialQuery = "" }: { className?: string
     const q = query.trim();
     if (!q) return;
     setOpen(false);
+    onNavigate?.();
     router.push(`/search?q=${encodeURIComponent(q)}`);
   };
 
@@ -71,6 +72,7 @@ export function SearchBox({ className, initialQuery = "" }: { className?: string
           aria-expanded={showPanel}
           autoComplete="off"
           enterKeyHint="search"
+          autoFocus={autoFocus}
           className="h-11 w-full rounded-lg border border-line-strong bg-white pr-20 pl-4 text-sm text-graphite shadow-[0_1px_2px_rgb(47_52_48/0.03)] outline-none transition-[border-color,box-shadow] placeholder:text-ink-400 focus:border-sage-500 focus:ring-3 focus:ring-sage-500/15 [&::-webkit-search-cancel-button]:hidden"
         />
         {query && (
@@ -90,7 +92,7 @@ export function SearchBox({ className, initialQuery = "" }: { className?: string
             <div className="border-b border-line p-2">
               <p className="px-2 pt-1 pb-1.5 text-[11px] font-bold tracking-wider text-ink-400 uppercase">{t("categories")}</p>
               {data.categories.map((c) => (
-                <Link key={c.path} href={c.path} onClick={() => setOpen(false)} className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm hover:bg-beige-50">
+                <Link key={c.path} href={c.path} onClick={() => (setOpen(false), onNavigate?.())} className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm hover:bg-beige-50">
                   <LayoutGrid className="size-4 text-sage-600" />
                   {c.name}
                 </Link>
@@ -101,7 +103,7 @@ export function SearchBox({ className, initialQuery = "" }: { className?: string
             <div className="p-2">
               <p className="px-2 pt-1 pb-1.5 text-[11px] font-bold tracking-wider text-ink-400 uppercase">{t("suggestions")}</p>
               {data.products.map((p) => (
-                <Link key={p.slug} href={`/product/${p.slug}`} onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-beige-50">
+                <Link key={p.slug} href={`/product/${p.slug}`} onClick={() => (setOpen(false), onNavigate?.())} className="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-beige-50">
                   <span className="relative size-11 shrink-0 overflow-hidden rounded-md bg-beige-50">
                     {p.image && <Image src={p.image.src} alt="" fill sizes="44px" className="object-cover" />}
                   </span>

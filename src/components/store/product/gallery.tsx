@@ -186,12 +186,12 @@ export function ProductGallery({ items, activeColorValueId, badges }: { items: G
           )}
         </div>
 
-        {/* свайп (телефон) */}
-        <div className="-mx-4 lg:hidden">
-          <div ref={emblaRef} className="overflow-hidden">
+        {/* телефон: свайп по главному фото и миниатюры колонкой справа (как в мобильном макете) */}
+        <div className="flex gap-2 lg:hidden">
+          <div ref={emblaRef} className="min-w-0 flex-1 overflow-hidden rounded-xl">
             <div className="flex">
               {visible.map((item, i) => (
-                <div key={item.id} className="relative aspect-square min-w-0 flex-[0_0_100%] bg-beige-50">
+                <div key={item.id} className="relative aspect-[6/5] min-w-0 flex-[0_0_100%] bg-beige-50">
                   {item.kind === "image" ? (
                     <button type="button" className="relative block size-full" onClick={() => setLightbox(true)} aria-label={item.image.alt}>
                       <OnlyAt image={item.image} sizes="100vw" skip={DESKTOP} eager={i === 0 || warm} className="object-cover" />
@@ -204,10 +204,32 @@ export function ProductGallery({ items, activeColorValueId, badges }: { items: G
             </div>
           </div>
           {visible.length > 1 && (
-            <div className="mt-3 flex justify-center gap-1.5">
-              {visible.map((item, i) => (
-                <button key={item.id} type="button" onClick={() => go(i)} aria-label={t("photo", { index: i + 1 })} className={cn("h-1.5 rounded-full transition-all", i === index ? "w-5 bg-sage-700" : "w-1.5 bg-graphite/20")} />
-              ))}
+            <div className="relative w-[54px] shrink-0">
+              <div className="scrollbar-none absolute inset-0 flex flex-col gap-2 overflow-y-auto">
+                {visible.map((item, i) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => go(i)}
+                    aria-label={t("photo", { index: i + 1 })}
+                    aria-current={i === index}
+                    className="relative aspect-square w-full shrink-0 overflow-hidden rounded-lg bg-beige-50"
+                  >
+                    {item.kind === "image" ? (
+                      <Image src={item.image.src} alt="" fill sizes="54px" className="object-cover" />
+                    ) : (
+                      <>
+                        {item.poster && <Image src={item.poster.src} alt="" fill sizes="54px" className="object-cover opacity-70" />}
+                        <span className="absolute inset-0 grid place-items-center bg-graphite/30 text-white">
+                          <Play className="size-4 fill-white" />
+                        </span>
+                      </>
+                    )}
+                    {/* рамка поверх фото: у выбранного — зелёная */}
+                    <span className={cn("pointer-events-none absolute inset-0 rounded-lg ring-inset", i === index ? "ring-2 ring-sage-700" : "ring-1 ring-line")} />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

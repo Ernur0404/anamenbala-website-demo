@@ -48,11 +48,11 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   return (
     <>
       <PageHero title={title} subtitle={trOrNull(page, "subtitle", locale)} script={trOrNull(page, "script", locale)} image={toImage(page.heroImage, title)} breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: title }]}>
-        {content.intro && <p className="mt-3 max-w-[58%] text-sm leading-relaxed text-ink-600 sm:max-w-[440px]">{pickLocale(content.intro, locale)}</p>}
+        {content.intro && <p className="mt-1 text-sm leading-relaxed text-ink-600 lg:mt-3 lg:max-w-[440px]">{pickLocale(content.intro, locale)}</p>}
       </PageHero>
 
       {content.features && content.features.length > 0 && (
-        <section className="container-page mt-8">
+        <section className="container-page mt-4 lg:mt-8">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {content.features.map((f, i) => (
               <div key={i} className="flex flex-col items-center gap-3 rounded-xl border border-line bg-white px-4 py-6 text-center">

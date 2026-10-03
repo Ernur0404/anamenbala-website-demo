@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { AlertTriangle, ImageOff, Leaf, Tag, Trash2, Truck, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, Heart, ImageOff, Leaf, LoaderCircle, Tag, Trash2, Truck, X } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui/display";
@@ -17,7 +17,9 @@ import { cn } from "@/lib/utils";
 
 export function CartLine({ line, compact, onChanged }: { line: CartLineView; compact?: boolean; onChanged: () => void }) {
   const t = useTranslations("cart");
-  const { setCartCount } = useStore();
+  const tp = useTranslations("product");
+  const { setCartCount, isFavorite, toggleFavorite } = useStore();
+  const favorite = isFavorite(line.productId);
   const [pending, startTransition] = useTransition();
 
   const setQty = (quantity: number) =>
@@ -34,8 +36,15 @@ export function CartLine({ line, compact, onChanged }: { line: CartLineView; com
     });
 
   return (
-    <div className={cn("relative flex gap-3 sm:gap-4", compact ? "py-3" : "rounded-xl border border-line bg-white p-3 sm:p-4", pending && "opacity-60", line.problem && !compact && "border-powder-300")}>
-      <Link href={`/product/${line.slug}`} className={cn("relative shrink-0 overflow-hidden rounded-md bg-beige-50", compact ? "size-16" : "size-24 sm:size-28")}>
+    <div
+      className={cn(
+        "relative flex gap-3 sm:gap-4",
+        compact ? "py-3" : "py-3.5 sm:rounded-xl sm:border sm:border-line sm:bg-white sm:p-4",
+        pending && "opacity-60",
+        line.problem && !compact && "sm:border-powder-300",
+      )}
+    >
+      <Link href={`/product/${line.slug}`} className={cn("relative shrink-0 overflow-hidden rounded-md bg-beige-50", compact ? "size-16" : "size-[88px] rounded-lg sm:size-28 sm:rounded-md")}>
         {line.image ? <Image src={line.image.src} alt={line.image.alt} fill sizes="112px" className="object-cover" /> : <ImageOff className="m-auto mt-8 size-6 text-beige-400" />}
       </Link>
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
@@ -58,13 +67,30 @@ export function CartLine({ line, compact, onChanged }: { line: CartLineView; com
           {line.problem !== "VARIANT_UNAVAILABLE" && (
             <QuantityStepper size="sm" value={line.quantity} onChange={setQty} max={Math.max(line.maxQuantity, line.quantity)} disabled={pending} />
           )}
-          <span className="text-[15px] font-bold whitespace-nowrap">{formatMoney(line.lineTotal)}</span>
+          <span className={cn("text-[15px] font-bold whitespace-nowrap", !compact && "max-sm:hidden")}>{formatMoney(line.lineTotal)}</span>
         </div>
       </div>
+      {!compact && (
+        // телефон: «в избранное» сверху и удаление снизу, как в мобильном макете
+        <div className="flex shrink-0 flex-col items-center justify-between sm:hidden">
+          <button
+            type="button"
+            onClick={() => void toggleFavorite(line.productId)}
+            aria-pressed={favorite}
+            aria-label={favorite ? tp("inFavorites") : t("toFavorites")}
+            className="-mt-1 -mr-1.5 grid size-9 place-items-center rounded-full text-ink-500 transition-colors hover:bg-beige-100"
+          >
+            <Heart className={cn("size-[19px] stroke-[1.7]", favorite && "fill-powder-500 text-powder-500")} />
+          </button>
+          <button type="button" onClick={remove} className="-mr-1.5 -mb-1 grid size-9 place-items-center rounded-full text-ink-400 transition-colors hover:bg-beige-100 hover:text-powder-700" aria-label={t("remove")}>
+            {pending ? <LoaderCircle className="size-[18px] animate-spin" /> : <Trash2 className="size-[18px] stroke-[1.7]" />}
+          </button>
+        </div>
+      )}
       <button
         type="button"
         onClick={remove}
-        className={cn("grid size-8 shrink-0 place-items-center rounded-full text-ink-400 transition-colors hover:bg-beige-100 hover:text-powder-700", !compact && "absolute top-2 right-2 sm:static")}
+        className={cn("grid size-8 shrink-0 place-items-center rounded-full text-ink-400 transition-colors hover:bg-beige-100 hover:text-powder-700", !compact && "hidden sm:grid")}
         aria-label={t("remove")}
       >
         <X className="size-4" />
@@ -73,7 +99,7 @@ export function CartLine({ line, compact, onChanged }: { line: CartLineView; com
   );
 }
 
-export function PromoForm({ promo, error }: { promo: CartView["promo"]; error: CartView["promoError"] }) {
+export function PromoForm({ promo, error, compact }: { promo: CartView["promo"]; error: CartView["promoError"]; compact?: boolean }) {
   const t = useTranslations();
   const router = useRouter();
   const [code, setCode] = useState("");
@@ -118,18 +144,35 @@ export function PromoForm({ promo, error }: { promo: CartView["promo"]; error: C
         });
       }}
     >
-      <div className="flex gap-2">
-        <input
-          value={code}
-          onChange={(e) => setCode(e.target.value.toUpperCase())}
-          placeholder={t("cart.promoPlaceholder")}
-          aria-label={t("cart.promo")}
-          className="h-11 min-w-0 flex-1 rounded-md border border-line-strong bg-white px-3.5 text-sm tracking-wide uppercase outline-none placeholder:normal-case placeholder:tracking-normal focus:border-sage-500 focus:ring-3 focus:ring-sage-500/15"
-        />
-        <Button type="submit" loading={pending} disabled={!code.trim()}>
-          {t("cart.promoApply")}
-        </Button>
-      </div>
+      {compact ? (
+        <label className="flex items-center gap-2 rounded-xl border border-line-strong bg-white py-1.5 pr-1.5 pl-3.5 focus-within:border-sage-500 focus-within:ring-3 focus-within:ring-sage-500/15">
+          <span className="min-w-0 flex-1">
+            <span className="block text-[11px] font-medium text-ink-500">{t("cart.promo")}</span>
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder={t("cart.promoPlaceholder")}
+              className="h-6 w-full bg-transparent text-sm tracking-wide uppercase outline-none placeholder:normal-case placeholder:tracking-normal placeholder:text-ink-400"
+            />
+          </span>
+          <button type="submit" disabled={pending || !code.trim()} className="grid size-9 shrink-0 place-items-center rounded-lg text-sage-700 transition-colors hover:bg-sage-50 disabled:text-ink-300" aria-label={t("cart.promoApply")}>
+            {pending ? <LoaderCircle className="size-[18px] animate-spin" /> : <ArrowRight className="size-[18px]" />}
+          </button>
+        </label>
+      ) : (
+        <div className="flex gap-2">
+          <input
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder={t("cart.promoPlaceholder")}
+            aria-label={t("cart.promo")}
+            className="h-11 min-w-0 flex-1 rounded-md border border-line-strong bg-white px-3.5 text-sm tracking-wide uppercase outline-none placeholder:normal-case placeholder:tracking-normal focus:border-sage-500 focus:ring-3 focus:ring-sage-500/15"
+          />
+          <Button type="submit" loading={pending} disabled={!code.trim()}>
+            {t("cart.promoApply")}
+          </Button>
+        </div>
+      )}
       {error && <p className="mt-2 text-xs font-medium text-powder-700">{errorText(error.code, error.minOrderAmount)}</p>}
     </form>
   );
@@ -141,13 +184,13 @@ export function FreeDeliveryBanner({ threshold, itemsTotal }: { threshold: numbe
   const left = Math.max(0, threshold - itemsTotal);
   const progress = Math.min(100, Math.round((itemsTotal / threshold) * 100));
   return (
-    <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-beige-100 to-sage-100 p-5">
-      <div className="flex items-center gap-4">
-        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-white/70 text-sage-700">
-          <Truck className="size-6" />
+    <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-beige-100 to-sage-100 p-4 sm:p-5">
+      <div className="flex items-center gap-3 sm:gap-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/70 text-sage-700 sm:size-12">
+          <Truck className="size-5 sm:size-6" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="heading-section text-[22px] leading-tight">{t("freeDelivery")}</p>
+          <p className="heading-section text-[19px] leading-tight sm:text-[22px]">{t("freeDelivery")}</p>
           <p className="text-sm text-ink-600">{left > 0 ? t("freeDeliveryLeft", { amount: formatMoney(left) }) : t("freeDeliveryReached")}</p>
         </div>
         <Leaf className="hidden size-10 text-sage-400 sm:block" />
@@ -169,7 +212,7 @@ export function CartClient({ cart }: { cart: CartView }) {
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_380px] lg:gap-8">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="hidden items-center justify-between sm:flex">
           <p className="text-sm text-ink-500">{t("selected", { count: cart.itemsCount })}</p>
           <button
             type="button"
@@ -187,11 +230,16 @@ export function CartClient({ cart }: { cart: CartView }) {
             {t("clear")}
           </button>
         </div>
-        {cart.lines.map((line) => (
-          <CartLine key={line.variantId} line={line} onChanged={refresh} />
-        ))}
+        <div className="max-sm:divide-y max-sm:divide-line max-sm:border-b max-sm:border-line sm:space-y-4">
+          {cart.lines.map((line) => (
+            <CartLine key={line.variantId} line={line} onChanged={refresh} />
+          ))}
+        </div>
+        <div className="sm:hidden">
+          <PromoForm promo={cart.promo} error={cart.promoError} compact />
+        </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-line bg-white p-5">
+          <div className="hidden rounded-xl border border-line bg-white p-5 sm:block">
             <p className="mb-3 flex items-center gap-2 text-sm font-bold">
               <Tag className="size-4 text-sage-700" />
               {t("promo")}
@@ -202,9 +250,9 @@ export function CartClient({ cart }: { cart: CartView }) {
         </div>
       </div>
 
-      <aside className={cn("rounded-xl border border-line bg-white p-5 sm:p-6 lg:sticky lg:top-[150px]", pending && "opacity-70")}>
-        <h2 className="heading-section text-[28px]">{t("total")}</h2>
-        <dl className="mt-4 space-y-3 text-sm">
+      <aside className={cn("sm:rounded-xl sm:border sm:border-line sm:bg-white sm:p-6 lg:sticky lg:top-[150px]", pending && "opacity-70")}>
+        <h2 className="heading-section hidden text-[28px] sm:block">{t("total")}</h2>
+        <dl className="mt-4 hidden space-y-3 text-sm sm:block">
           <div className="flex justify-between">
             <dt className="text-ink-600">{t("items", { count: cart.itemsCount })}</dt>
             <dd className="font-semibold">{formatMoney(cart.itemsRegular)}</dd>
@@ -226,12 +274,18 @@ export function CartClient({ cart }: { cart: CartView }) {
             <dd className="font-semibold">{cart.freeDeliveryThreshold && cart.itemsTotal >= cart.freeDeliveryThreshold ? t("deliveryFree") : t("deliveryLater")}</dd>
           </div>
         </dl>
-        <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
-          <span className="text-base font-semibold">{t("toPay")}</span>
-          <span className="text-[26px] font-bold tracking-tight">{formatMoney(cart.total)}</span>
+        <div className="flex items-baseline justify-between sm:mt-4 sm:border-t sm:border-line sm:pt-4">
+          <span className="text-base font-semibold">
+            <span className="sm:hidden">{t("total")}:</span>
+            <span className="hidden sm:inline">{t("toPay")}</span>
+          </span>
+          <span className="text-[22px] font-bold tracking-tight sm:text-[26px]">{formatMoney(cart.total)}</span>
         </div>
+        {cart.itemsDiscount + (cart.promo?.discount ?? 0) > 0 && (
+          <p className="mt-0.5 text-right text-[12px] font-semibold text-sage-700 sm:hidden">{t("savings", { amount: formatMoney(cart.itemsDiscount + (cart.promo?.discount ?? 0)) })}</p>
+        )}
         {cart.hasProblems && <p className="mt-3 rounded-md bg-powder-50 p-3 text-xs font-medium text-powder-800">{t("fixProblems")}</p>}
-        <Button asChild={!cart.hasProblems} block size="lg" className="mt-5" disabled={cart.hasProblems}>
+        <Button asChild={!cart.hasProblems} block size="lg" className="mt-4 sm:mt-5" disabled={cart.hasProblems}>
           {cart.hasProblems ? <span>{t("checkout")}</span> : <Link href="/checkout">{t("checkout")}</Link>}
         </Button>
       </aside>

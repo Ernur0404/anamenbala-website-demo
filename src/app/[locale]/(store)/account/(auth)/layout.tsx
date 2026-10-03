@@ -13,7 +13,7 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
   return (
     <>
       <PageHero title={hero?.title ?? t("account.title")} subtitle={hero?.subtitle} image={hero?.image} compact breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: t("account.title") }]} />
-      <div className="container-page mt-8">{children}</div>
+      <div className="container-page mt-4 lg:mt-8">{children}</div>
     </>
   );
 }

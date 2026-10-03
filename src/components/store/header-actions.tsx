@@ -48,6 +48,15 @@ export function HeaderActions({ userName }: { userName: string | null }) {
   );
 }
 
+export function MobileAccountButton() {
+  const t = useTranslations("nav");
+  return (
+    <Link href="/account" className="grid size-10 place-items-center rounded-full text-graphite hover:bg-beige-100" aria-label={t("account")}>
+      <User className="size-[22px] stroke-[1.7]" />
+    </Link>
+  );
+}
+
 export function MobileCartButton() {
   const t = useTranslations("nav");
   const { cartCount } = useStore();

@@ -72,9 +72,9 @@ export async function SidebarPromo({ variant, threshold }: { variant: "delivery"
 export function SubcategoryTiles({ items }: { items: { key: string; label: string; href: string; icon: string | null; image: ImageData | null }[] }) {
   if (!items.length) return null;
   return (
-    <div className="scrollbar-none -mx-4 mb-8 flex snap-x gap-3 overflow-x-auto px-4 lg:mx-0 lg:grid lg:grid-cols-6 lg:overflow-visible lg:px-0">
+    <div className="mb-8 hidden gap-3 lg:grid lg:grid-cols-6">
       {items.map((item) => (
-        <Link key={item.key} href={item.href} className="group w-[31%] shrink-0 snap-start overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-card sm:w-[22%] lg:w-auto">
+        <Link key={item.key} href={item.href} className="group overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-card">
           <span className="relative block aspect-square bg-beige-50">
             {item.image ? (
               <Image src={item.image.src} alt={item.image.alt} fill sizes="(max-width: 1024px) 30vw, 180px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -94,14 +94,14 @@ export function SubcategoryTiles({ items }: { items: { key: string; label: strin
 /** Плитки разделов на странице «Акции» */
 export function SaleTiles({ items }: { items: { key: string; label: string; href: string; icon: string | null; active: boolean }[] }) {
   return (
-    <div className="scrollbar-none -mx-4 mb-8 flex snap-x gap-3 overflow-x-auto px-4 lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:px-0">
+    <div className="mb-8 hidden gap-3 lg:grid lg:grid-cols-5">
       {items.map((item, i) => (
         <Link
           key={item.key}
           href={item.href}
           aria-current={item.active ? "page" : undefined}
           className={cn(
-            "flex w-[38%] shrink-0 snap-start flex-col items-center justify-center gap-3 rounded-xl px-4 py-6 text-sm font-semibold transition-colors sm:w-[24%] lg:w-auto",
+            "flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-6 text-sm font-semibold transition-colors",
             item.active ? "bg-powder-200 text-powder-800 ring-2 ring-powder-400" : "bg-beige-100 text-graphite hover:bg-beige-200",
           )}
         >

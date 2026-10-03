@@ -30,7 +30,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <PageHero title={title} subtitle={page ? trOrNull(page, "subtitle", locale) : null} image={page ? toImage(page.heroImage, title) : null} compact breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: title }]} />
-      <section className="container-page mt-8">
+      <section className="container-page mt-4 lg:mt-8">
         <Accordion type="single" collapsible className="max-w-3xl rounded-xl border border-line bg-white px-5">
           {faq.map((f) => (
             <AccordionItem key={f.id} value={f.id}>

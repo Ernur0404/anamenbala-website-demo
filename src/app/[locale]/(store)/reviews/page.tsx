@@ -48,7 +48,7 @@ export default async function ReviewsPage({ params, searchParams }: { params: Pr
           </p>
         )}
       </PageHero>
-      <div className="container-page mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
+      <div className="container-page mt-4 grid gap-8 lg:mt-8 lg:grid-cols-[1fr_380px]">
         <div className="space-y-4">
           {reviews.length === 0 && <p className="rounded-xl border border-dashed border-line-strong bg-white/60 p-8 text-center text-ink-500">{t("reviews.storeEmpty")}</p>}
           {reviews.map((r) => (

@@ -7,7 +7,9 @@ import { StoreProvider } from "@/components/store/store-provider";
 import { TopBar } from "@/components/store/top-bar";
 import { Logo } from "@/components/store/logo";
 import { SearchBox } from "@/components/store/search-box";
-import { HeaderActions, MobileCartButton } from "@/components/store/header-actions";
+import { HeaderActions, MobileAccountButton, MobileCartButton } from "@/components/store/header-actions";
+import { MobileSearchButton } from "@/components/store/mobile-search";
+import { NavigationHistory } from "@/components/store/mobile-title-bar";
 import { CategoryNav, MobileMenu, MobileMenuButton, MobileMenuProvider } from "@/components/store/catalog-menu";
 import { BottomNav } from "@/components/store/bottom-nav";
 import { Footer } from "@/components/store/footer";
@@ -22,22 +24,22 @@ export default async function StoreLayout({ children, params }: { children: Reac
     <StoreProvider initialCartCount={cartCount} initialFavorites={favorites}>
       <MobileMenuProvider>
         <div className="flex min-h-dvh flex-col">
-          <TopBar items={chrome.topbar} />
+          <NavigationHistory />
+          <TopBar items={chrome.topbar} className="hidden lg:block" />
           <header className="sticky top-0 z-40 border-b border-line/80 bg-cream/95 backdrop-blur supports-[backdrop-filter]:bg-cream/85">
-            <div className="container-page flex h-16 items-center gap-2 lg:h-[84px] lg:gap-10">
+            <div className="container-page flex h-14 items-center gap-1 lg:h-[84px] lg:gap-10">
               <MobileMenuButton />
-              <Logo name={chrome.storeName} tagline={chrome.tagline} size="sm" className="lg:hidden" />
+              <Logo name={chrome.storeName} tagline={chrome.tagline} size="sm" className="ml-0.5 lg:hidden" />
               <Logo name={chrome.storeName} tagline={chrome.tagline} className="hidden lg:flex" />
               <SearchBox className="mx-auto hidden max-w-[560px] flex-1 lg:block" />
               <div className="ml-auto hidden lg:block">
                 <HeaderActions userName={user?.name ?? null} />
               </div>
-              <div className="ml-auto lg:hidden">
+              <div className="-mr-1.5 ml-auto flex items-center lg:hidden">
+                <MobileSearchButton />
+                <MobileAccountButton />
                 <MobileCartButton />
               </div>
-            </div>
-            <div className="container-page pb-3 lg:hidden">
-              <SearchBox />
             </div>
             <CategoryNav categories={chrome.menu} />
           </header>

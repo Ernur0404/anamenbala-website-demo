@@ -39,24 +39,24 @@ function HeroPicture({ banner, first, warm }: { banner: BannerView; first: boole
 
 function Slide({ banner, first, warm }: { banner: BannerView; first: boolean; warm: boolean }) {
   return (
-    <div className="relative h-[520px] overflow-hidden rounded-2xl bg-beige-100 sm:h-[440px] lg:h-[420px]">
+    <div className="relative h-[236px] overflow-hidden bg-beige-100 sm:h-[440px] sm:rounded-2xl lg:h-[420px]">
       <HeroPicture banner={banner} first={first} warm={warm} />
-      {/* мягкая подложка под текст: снизу на телефоне, слева на компьютере */}
-      <div className="absolute inset-0 bg-gradient-to-t from-cream via-cream/75 to-transparent sm:bg-gradient-to-r sm:from-cream sm:via-cream/80 sm:to-transparent sm:[background-size:70%_100%] sm:bg-no-repeat" />
+      {/* мягкая подложка под текст слева */}
+      <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/80 to-transparent [background-size:82%_100%] bg-no-repeat sm:[background-size:70%_100%]" />
       {banner.script && (
         <p className="script-accent absolute top-6 right-6 hidden max-w-[220px] rotate-[-4deg] text-right text-[26px] text-graphite/80 lg:block">
           {banner.script}
           <Heart className="mt-1 ml-auto size-5 stroke-[1.4]" />
         </p>
       )}
-      <div className="absolute inset-x-0 bottom-0 p-6 sm:inset-y-0 sm:flex sm:max-w-[560px] sm:flex-col sm:justify-center sm:p-10 lg:p-14">
-        {banner.eyebrow && <p className="mb-3 text-[12px] font-bold tracking-[0.18em] text-sage-700 uppercase">{banner.eyebrow}</p>}
-        <h2 className="heading-display text-[38px] text-graphite sm:text-[48px] lg:text-[56px]">{banner.title}</h2>
-        {banner.text && <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-700 sm:text-base">{banner.text}</p>}
+      <div className="absolute inset-y-0 left-0 flex max-w-[66%] flex-col justify-center py-4 pr-2 pl-5 sm:inset-x-0 sm:max-w-[560px] sm:p-10 lg:p-14">
+        {banner.eyebrow && <p className="mb-1.5 text-[10px] font-bold tracking-[0.14em] text-sage-700 uppercase sm:mb-3 sm:text-[12px] sm:tracking-[0.18em]">{banner.eyebrow}</p>}
+        <h2 className="heading-display text-[27px] text-graphite sm:text-[48px] lg:text-[56px]">{banner.title}</h2>
+        {banner.text && <p className="mt-1.5 line-clamp-2 max-w-md text-[12.5px] leading-snug text-ink-700 sm:mt-4 sm:line-clamp-none sm:text-base sm:leading-relaxed">{banner.text}</p>}
         {banner.buttonText && banner.url && (
           <Link
             href={banner.url}
-            className="mt-6 inline-flex h-12 w-fit items-center gap-2 rounded-lg bg-sage-700 px-6 text-sm font-semibold text-white transition-colors hover:bg-sage-800"
+            className="mt-3 inline-flex h-9 w-fit items-center gap-2 rounded-lg bg-sage-700 px-4 text-[12.5px] font-semibold text-white transition-colors hover:bg-sage-800 sm:mt-6 sm:h-12 sm:px-6 sm:text-sm"
           >
             {banner.buttonText}
             <ArrowRight className="size-4" />
@@ -103,9 +103,9 @@ export function HeroSlider({ banners }: { banners: BannerView[] }) {
 
   if (!banners.length) return null;
   return (
-    <section className="container-page pt-4 sm:pt-6" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel">
-      <div className="relative">
-        <div ref={emblaRef} className="overflow-hidden rounded-2xl">
+    <section className="container-page sm:pt-6" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel">
+      <div className="relative -mx-4 sm:mx-0">
+        <div ref={emblaRef} className="overflow-hidden sm:rounded-2xl">
           <div className="flex">
             {banners.map((b, i) => (
               <div key={b.id} className="min-w-0 flex-[0_0_100%]" aria-roledescription="slide" aria-label={t("slide", { index: i + 1 })}>
@@ -115,7 +115,7 @@ export function HeroSlider({ banners }: { banners: BannerView[] }) {
           </div>
         </div>
         {banners.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+          <div className="mt-3 flex justify-center gap-2 sm:absolute sm:bottom-4 sm:left-1/2 sm:mt-0 sm:-translate-x-1/2">
             {banners.map((b, i) => (
               <button
                 key={b.id}

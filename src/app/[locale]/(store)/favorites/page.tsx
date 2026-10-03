@@ -30,7 +30,7 @@ export default async function FavoritesPage({ params }: { params: Promise<{ loca
         image={hero?.image}
         breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: hero?.title ?? t("nav.favorites") }]}
       />
-      <div className="container-page mt-6 sm:mt-8">
+      <div className="container-page mt-3 lg:mt-8">
         {products.length ? (
           <FavoritesList products={products} labels={{ clear: t("favorites.clear"), empty: t("favorites.empty") }} />
         ) : (

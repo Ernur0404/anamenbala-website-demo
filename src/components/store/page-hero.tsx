@@ -1,11 +1,53 @@
-import Image from "next/image";
 import { Heart } from "lucide-react";
 import type { ImageData } from "@/server/catalog/cards";
 import { Breadcrumbs, type Crumb } from "./breadcrumbs";
+import { MobileTitleBar } from "./mobile-title-bar";
+import { ViewportImage } from "./viewport-image";
 import { cn } from "@/lib/utils";
 
-/** Баннер-заголовок страниц (каталог, категории, акции, о магазине…) — как в макете */
+/**
+ * Баннер-заголовок страниц (каталог, категории, акции, о магазине…) — как в макете.
+ * На телефоне вместо баннера — строка «← Заголовок» (mobile="title") или ничего, если страница
+ * рисует свою мобильную шапку (mobile="none").
+ */
 export function PageHero({
+  title,
+  subtitle,
+  script,
+  image,
+  breadcrumbs,
+  children,
+  className,
+  compact,
+  mobile = "title",
+}: {
+  title: string;
+  subtitle?: string | null;
+  script?: string | null;
+  image?: ImageData | null;
+  breadcrumbs?: Crumb[];
+  children?: React.ReactNode;
+  className?: string;
+  compact?: boolean;
+  mobile?: "title" | "none";
+}) {
+  const backHref = breadcrumbs && breadcrumbs.length > 1 ? (breadcrumbs[breadcrumbs.length - 2].href ?? "/") : "/";
+  return (
+    <>
+      {mobile === "title" && (
+        <>
+          <MobileTitleBar title={title} backHref={backHref} />
+          {children && <div className="container-page lg:hidden">{children}</div>}
+        </>
+      )}
+      <PageHeroBanner title={title} subtitle={subtitle} script={script} image={image} breadcrumbs={breadcrumbs} className={cn("hidden lg:block", className)} compact={compact}>
+        {children}
+      </PageHeroBanner>
+    </>
+  );
+}
+
+function PageHeroBanner({
   title,
   subtitle,
   script,
@@ -29,18 +71,7 @@ export function PageHero({
       <div className={cn("relative overflow-hidden rounded-2xl bg-gradient-to-r from-beige-50 to-beige-100", compact ? "min-h-[150px]" : "min-h-[190px] sm:min-h-[230px]")}>
         {image && (
           <div className="absolute inset-y-0 right-0 w-[62%] sm:w-[58%]">
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              preload
-              loading="eager"
-              fetchPriority="high"
-              sizes="(max-width: 1024px) 60vw, 780px"
-              placeholder={image.blur ? "blur" : "empty"}
-              blurDataURL={image.blur ?? undefined}
-              className="object-cover [mask-image:linear-gradient(to_right,transparent,black_35%)] sm:[mask-image:linear-gradient(to_right,transparent,black_25%)]"
-            />
+            <ViewportImage image={image} only="desktop" priority sizes="(max-width: 1320px) 60vw, 780px" className="object-cover [mask-image:linear-gradient(to_right,transparent,black_25%)]" />
           </div>
         )}
         {script && (

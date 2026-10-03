@@ -4,7 +4,7 @@ import { PackageSearch } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { ProductGrid } from "../product-card";
 import { EmptyState } from "@/components/ui/display";
-import { FiltersPanel, MobileFilters, type FiltersProps } from "./filters";
+import { FiltersInline, FiltersPanel, MobileFilters, type FiltersProps } from "./filters";
 import { CategorySearch, SortSelect } from "./toolbar";
 import { Pagination } from "./pagination";
 import type { Listing } from "@/server/catalog/listing";
@@ -19,6 +19,8 @@ export async function CatalogView({
   categoryFacet,
   showDiscount,
   showCategorySearch = true,
+  inlineFilters,
+  belowGrid,
 }: {
   title: string;
   listing: Listing;
@@ -29,6 +31,10 @@ export async function CatalogView({
   categoryFacet?: FiltersProps["categoryFacet"];
   showDiscount?: boolean;
   showCategorySearch?: boolean;
+  /** на телефоне фильтры списком над товарами (вместо кнопки со шторкой) */
+  inlineFilters?: boolean;
+  /** блок под товарами (только телефон) */
+  belowGrid?: ReactNode;
 }) {
   const t = await getTranslations("listing");
   const filterProps: FiltersProps = {
@@ -43,6 +49,7 @@ export async function CatalogView({
   return (
     <div className="container-page mt-6 sm:mt-8">
       {aboveGrid}
+      {inlineFilters && <FiltersInline {...filterProps} />}
       <div className="grid gap-8 lg:grid-cols-[252px_1fr]">
         <aside className="hidden lg:block">
           <div className="space-y-6">
@@ -55,14 +62,14 @@ export async function CatalogView({
           </div>
         </aside>
 
-        <div className="min-w-0">
+        <div id="products" className="min-w-0 scroll-mt-20">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="heading-section text-[28px] sm:text-[32px]">{title}</h2>
+              <h2 className="heading-section text-[25px] sm:text-[32px]">{title}</h2>
               <p className="mt-0.5 text-sm text-ink-500">{t("products", { count: listing.total })}</p>
             </div>
             <div className="flex w-full items-center gap-2 sm:w-auto">
-              <MobileFilters {...filterProps} />
+              {!inlineFilters && <MobileFilters {...filterProps} />}
               {showCategorySearch && <CategorySearch className="hidden w-60 md:block" />}
               <SortSelect className="ml-auto sm:ml-0" />
             </div>
@@ -85,6 +92,7 @@ export async function CatalogView({
               }
             />
           )}
+          {belowGrid && <div className="mt-8 lg:hidden">{belowGrid}</div>}
         </div>
       </div>
     </div>

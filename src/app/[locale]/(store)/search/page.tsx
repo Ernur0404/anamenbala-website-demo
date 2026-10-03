@@ -57,7 +57,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
     return (
       <>
         <PageHero title={hero?.title ?? t("search.nothingTitle")} script={hero?.script} image={hero?.image} breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: t("common.search") }]} compact />
-        <div className="container-page mt-8">
+        <div className="container-page mt-4 lg:mt-8">
           <EmptyState icon={<SearchX />} title={t("search.emptyQuery")} />
         </div>
         <PopularQueries title={t("search.popular")} queries={popularQueries} />
@@ -95,7 +95,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
     return (
       <>
         <PageHero title={heroTitle} subtitle={subtitle} script={hero?.script} image={hero?.image} breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: t("common.search") }]} />
-        <div className="container-page mt-8">
+        <div className="container-page mt-4 lg:mt-8">
           <EmptyState icon={<SearchX />} title={t("search.nothingTitle")} text={t("search.nothingText")} />
         </div>
         <PopularQueries title={t("search.popular")} queries={popularQueries} />

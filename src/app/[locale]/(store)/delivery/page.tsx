@@ -35,7 +35,7 @@ export default async function DeliveryPage({ params }: { params: Promise<{ local
     <>
       <PageHero title={title} subtitle={trOrNull(page, "subtitle", locale)} script={trOrNull(page, "script", locale)} image={toImage(page.heroImage, title)} breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: title }]} />
 
-      <section className="container-page mt-10">
+      <section className="container-page mt-4 lg:mt-10">
         <div className="mb-5 flex items-center gap-3">
           <span className="grid size-11 place-items-center rounded-full bg-sage-100 text-sage-700">
             <Truck className="size-5" />

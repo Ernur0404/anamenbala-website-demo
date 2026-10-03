@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ArrowLeft, Check, ChevronDown, LockKeyhole, MapPin, PackageCheck, ShieldCheck, Store, Truck, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, LockKeyhole, MapPin, ShieldCheck, Store, Truck, Wallet } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Field, Input, Textarea } from "@/components/ui/form";
@@ -43,15 +43,42 @@ type Defaults = {
   postalCode: string;
 };
 
-function Step({ index, title, children }: { index: number; title: string; children: React.ReactNode }) {
+function Step({ index, title, children, className }: { index: number; title: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className="rounded-xl border border-line bg-white p-5 sm:p-6">
-      <h2 className="mb-5 flex items-center gap-3 text-lg font-bold">
-        <span className="grid size-8 place-items-center rounded-full bg-sage-700 text-sm text-white">{index}</span>
+    <section className={cn("lg:rounded-xl lg:border lg:border-line lg:bg-white lg:p-6", className)}>
+      <h2 className="mb-3 flex items-center gap-3 text-[16px] font-bold lg:mb-5 lg:text-lg">
+        <span className="hidden size-8 place-items-center rounded-full bg-sage-700 text-sm text-white lg:grid">{index}</span>
         {title}
       </h2>
       {children}
     </section>
+  );
+}
+
+/** Шаги оформления на телефоне: 1 Данные — 2 Доставка — 3 Оплата — 4 Подтверждение (как в мобильном макете) */
+function Stepper({ current, labels }: { current: number; labels: string[] }) {
+  return (
+    <ol className="mb-5 flex items-start lg:hidden">
+      {labels.map((label, i) => {
+        const n = i + 1;
+        const done = n < current;
+        const active = n === current;
+        return (
+          <li key={label} className="relative flex flex-1 flex-col items-center gap-1.5 text-center" aria-current={active ? "step" : undefined}>
+            {i > 0 && <span className={cn("absolute top-[15px] right-1/2 h-0.5 w-full -translate-y-1/2", n <= current ? "bg-sage-600" : "bg-line-strong")} aria-hidden />}
+            <span
+              className={cn(
+                "relative z-10 grid size-[30px] place-items-center rounded-full text-[13px] font-bold transition-colors",
+                active ? "bg-sage-700 text-white" : done ? "bg-sage-100 text-sage-700" : "border border-line-strong bg-white text-ink-400",
+              )}
+            >
+              {done ? <Check className="size-4" /> : n}
+            </span>
+            <span className={cn("text-[11px] leading-tight font-medium", active ? "text-sage-700" : "text-ink-500")}>{label}</span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -78,7 +105,8 @@ export function CheckoutForm({
   const [pending, startTransition] = useTransition();
   const [refreshing, startRefresh] = useTransition();
   const [idempotencyKey] = useState(() => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`));
-  const [summaryOpen, setSummaryOpen] = useState(false);
+  // шаг на телефоне: 1 — данные и доставка, 2 — оплата, 3 — подтверждение (на компьютере всё на одной странице)
+  const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({ ...defaults, phone: defaults.phone ? formatPhoneInput(defaults.phone) : "", comment: "", consent: false });
   const [deliveryId, setDeliveryId] = useState(deliveries[0]?.id ?? "");
@@ -103,6 +131,31 @@ export function CheckoutForm({
     if (!allowed.some((p) => p.id === paymentId)) setPaymentId(allowed[0]?.id ?? "");
   };
 
+  const goTo = (next: number) => {
+    setStep(next);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  /** проверка данных и адреса (первый шаг на телефоне) */
+  const validateDetails = () => {
+    const e: Record<string, string> = {};
+    if (form.name.trim().length < 2) e.name = "required";
+    if (!normalizePhone(form.phone)) e.phone = "invalidPhone";
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = "invalidEmail";
+    if (delivery?.kind === "KAZAKHSTAN" && !form.city.trim()) e.city = "required";
+    if (delivery && delivery.kind !== "PICKUP") {
+      if (!form.street.trim()) e.street = "required";
+      if (!form.house.trim()) e.house = "required";
+    }
+    setErrors(e);
+    if (Object.keys(e).length) {
+      toast.error(t("errors.VALIDATION"));
+      setTimeout(() => [...document.querySelectorAll<HTMLElement>("[aria-invalid=true]")].find((el) => el.offsetParent)?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+      return false;
+    }
+    return true;
+  };
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (form.name.trim().length < 2) e.name = "required";
@@ -122,7 +175,10 @@ export function CheckoutForm({
     e.preventDefault();
     if (!validate()) {
       toast.error(t("errors.VALIDATION"));
-      document.querySelector("[aria-invalid=true]")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      // на телефоне ошибка в данных или адресе — возвращаемся на первый шаг
+      const onlyConsent = form.name.trim().length >= 2 && normalizePhone(form.phone);
+      if (!onlyConsent && step !== 1) setStep(1);
+      setTimeout(() => [...document.querySelectorAll<HTMLElement>("[aria-invalid=true]")].find((el) => el.offsetParent)?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
       return;
     }
     startTransition(async () => {
@@ -155,6 +211,7 @@ export function CheckoutForm({
         toast.error(t("checkout.problems"), { duration: 8000 });
       } else if (result.code === "VALIDATION" && result.fieldErrors) {
         setErrors(result.fieldErrors);
+        if (Object.keys(result.fieldErrors).some((k) => k !== "consent")) setStep(1);
         toast.error(t("errors.VALIDATION"));
       } else {
         toast.error(t(`errors.${result.code}`));
@@ -164,6 +221,40 @@ export function CheckoutForm({
   };
 
   const fieldError = (key: string) => (errors[key] ? t(`errors.${errors[key] === "invalid" ? "invalid" : errors[key]}`) : undefined);
+
+  const consentBox = (
+    <>
+      <Checkbox
+        checked={form.consent}
+        onChange={(e) => {
+          setForm((f) => ({ ...f, consent: e.target.checked }));
+          setErrors((prev) => ({ ...prev, consent: "" }));
+        }}
+        aria-invalid={Boolean(errors.consent) || undefined}
+        label={
+          <span className="text-[13px] leading-relaxed">
+            {t.rich("checkout.consent", {
+              offer: (chunks) => (
+                <Link href="/offer" target="_blank" className="text-sage-700 underline underline-offset-2">
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link href="/privacy" target="_blank" className="text-sage-700 underline underline-offset-2">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </span>
+        }
+      />
+      {errors.consent && <p className="mt-1.5 text-xs font-medium text-powder-700">{t("errors.consent")}</p>}
+    </>
+  );
+
+  // номер шага в полосе прогресса: на первом экране после заполнения контактов — «Доставка»
+  const contactsDone = form.name.trim().length >= 2 && Boolean(normalizePhone(form.phone));
+  const stepNumber = step === 1 ? (contactsDone ? 2 : 1) : step === 2 ? 3 : 4;
 
   const summary = (
     <div className={cn("rounded-xl border border-line bg-white p-5 sm:p-6", refreshing && "opacity-70")}>
@@ -210,24 +301,10 @@ export function CheckoutForm({
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_400px] lg:gap-8">
-      {/* состав заказа на телефоне — свёрнут */}
-      <div className="lg:hidden">
-        <button type="button" onClick={() => setSummaryOpen((o) => !o)} className="flex w-full items-center justify-between rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-semibold" aria-expanded={summaryOpen}>
-          <span className="flex items-center gap-2">
-            <PackageCheck className="size-5 text-sage-700" />
-            {summaryOpen ? t("checkout.hideSummary") : t("checkout.showSummary")}
-          </span>
-          <span className="flex items-center gap-2">
-            {formatMoney(total)}
-            <ChevronDown className={cn("size-4 transition-transform", summaryOpen && "rotate-180")} />
-          </span>
-        </button>
-        {summaryOpen && <div className="mt-3">{summary}</div>}
-      </div>
-
-      <form id="checkout-form" onSubmit={submit} noValidate className="space-y-5">
+      <form id="checkout-form" onSubmit={submit} noValidate className="space-y-6 lg:space-y-5">
+        <Stepper current={stepNumber} labels={[t("checkout.steps.data"), t("checkout.steps.delivery"), t("checkout.steps.payment"), t("checkout.steps.confirm")]} />
         {!isLoggedIn && (
-          <p className="rounded-lg bg-beige-50 px-4 py-3 text-sm text-ink-600">
+          <p className={cn("rounded-lg bg-beige-50 px-4 py-3 text-sm text-ink-600", step !== 1 && "max-lg:hidden")}>
             {t.rich("checkout.loginHint", {
               link: (chunks) => (
                 <Link href="/account/login?next=/checkout" className="font-semibold text-sage-700 underline underline-offset-2">
@@ -238,9 +315,9 @@ export function CheckoutForm({
           </p>
         )}
 
-        <Step index={1} title={t("checkout.contacts")}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("checkout.name")} required error={fieldError("name")} className="sm:col-span-2">
+        <Step index={1} title={t("checkout.contacts")} className={cn(step !== 1 && "max-lg:hidden")}>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-4 lg:gap-4">
+            <Field label={t("checkout.name")} required error={fieldError("name")} className="col-span-2">
               <Input value={form.name} onChange={set("name")} placeholder={t("checkout.namePlaceholder")} autoComplete="name" invalid={Boolean(errors.name)} />
             </Field>
             <Field label={t("checkout.phone")} required error={fieldError("phone")}>
@@ -257,14 +334,14 @@ export function CheckoutForm({
                 invalid={Boolean(errors.phone)}
               />
             </Field>
-            <Field label={`${t("checkout.email")} (${t("common.optional")})`} hint={t("checkout.emailHint")} error={fieldError("email")}>
+            <Field label={`${t("checkout.email")} (${t("common.optional")})`} hint={<span className="hidden lg:inline">{t("checkout.emailHint")}</span>} error={fieldError("email")}>
               <Input type="email" value={form.email} onChange={set("email")} placeholder="example@mail.kz" autoComplete="email" inputMode="email" invalid={Boolean(errors.email)} />
             </Field>
           </div>
         </Step>
 
-        <Step index={2} title={t("checkout.address")}>
-          <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label={t("checkout.deliveryMethod")}>
+        <Step index={2} title={t("checkout.address")} className={cn(step !== 1 && "max-lg:hidden")}>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="radiogroup" aria-label={t("checkout.deliveryMethod")}>
             {deliveries.map((d) => {
               const Icon = DELIVERY_ICONS[d.kind];
               const price = d.freeFrom !== null && cart.itemsTotal >= d.freeFrom ? 0 : d.price;
@@ -307,9 +384,9 @@ export function CheckoutForm({
               </div>
             </div>
           ) : (
-            <div className="mt-5 grid gap-4 sm:grid-cols-6">
+            <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-6 sm:gap-4">
               {delivery?.kind === "LOCAL_COURIER" && delivery.address && (
-                <p className="flex items-center gap-2 text-sm text-ink-600 sm:col-span-6">
+                <p className="col-span-2 flex items-center gap-2 text-sm text-ink-600 sm:col-span-6">
                   <MapPin className="size-4 text-sage-700" />
                   {t("checkout.courierCity", { city: delivery.address })}
                 </p>
@@ -324,7 +401,7 @@ export function CheckoutForm({
                   </Field>
                 </>
               )}
-              <Field label={t("checkout.street")} required error={fieldError("street")} className="sm:col-span-6">
+              <Field label={t("checkout.street")} required error={fieldError("street")} className="col-span-2 sm:col-span-6">
                 <Input value={form.street} onChange={set("street")} autoComplete="address-line1" invalid={Boolean(errors.street)} />
               </Field>
               <Field label={t("checkout.house")} required error={fieldError("house")} className="sm:col-span-2">
@@ -346,7 +423,7 @@ export function CheckoutForm({
           </Field>
         </Step>
 
-        <Step index={3} title={t("checkout.payment")}>
+        <Step index={3} title={t("checkout.payment")} className={cn(step !== 2 && "max-lg:hidden")}>
           <div className="space-y-3" role="radiogroup" aria-label={t("checkout.payment")}>
             {allowedPayments.map((p) => {
               const active = p.id === payment?.id;
@@ -383,40 +460,67 @@ export function CheckoutForm({
             </div>
           </div>
 
-          <div className="mt-5">
-            <Checkbox
-              checked={form.consent}
-              onChange={(e) => {
-                setForm((f) => ({ ...f, consent: e.target.checked }));
-                setErrors((prev) => ({ ...prev, consent: "" }));
-              }}
-              aria-invalid={Boolean(errors.consent) || undefined}
-              label={
-                <span className="text-[13px] leading-relaxed">
-                  {t.rich("checkout.consent", {
-                    offer: (chunks) => (
-                      <Link href="/offer" target="_blank" className="text-sage-700 underline underline-offset-2">
-                        {chunks}
-                      </Link>
-                    ),
-                    privacy: (chunks) => (
-                      <Link href="/privacy" target="_blank" className="text-sage-700 underline underline-offset-2">
-                        {chunks}
-                      </Link>
-                    ),
-                  })}
-                </span>
-              }
-            />
-            {errors.consent && <p className="mt-1.5 text-xs font-medium text-powder-700">{t("errors.consent")}</p>}
-          </div>
+          <div className="mt-5 max-lg:hidden">{consentBox}</div>
         </Step>
 
-        <Link href="/cart" className="inline-flex items-center gap-2 text-sm font-semibold text-ink-600 hover:text-sage-700">
+        <Link href="/cart" className="hidden items-center gap-2 text-sm font-semibold text-ink-600 hover:text-sage-700 lg:inline-flex">
           <ArrowLeft className="size-4" />
           {t("checkout.backToCart")}
         </Link>
       </form>
+      {/* телефон: экран подтверждения и кнопки шагов — вне формы (в составе заказа своя форма промокода) */}
+      <div className="space-y-5 lg:hidden">
+        {/* телефон: шаг «Подтверждение» — получатель, доставка, оплата, состав заказа и согласие */}
+        {step === 3 && (
+          <div className="space-y-5 lg:hidden">
+            <h2 className="text-[16px] font-bold">{t("checkout.confirmTitle")}</h2>
+            <dl className="divide-y divide-line rounded-xl border border-line bg-white text-sm">
+              {[
+                { label: t("checkout.recipient"), value: `${form.name.trim()}, ${form.phone}`, step: 1 },
+                {
+                  label: t("checkout.address"),
+                  value: [delivery?.name, delivery?.kind === "PICKUP" ? delivery.address : [form.city, form.street, form.house && `${form.house}${form.apartment ? `, ${form.apartment}` : ""}`].filter(Boolean).join(", ")]
+                    .filter(Boolean)
+                    .join(" · "),
+                  step: 1,
+                },
+                { label: t("checkout.payment"), value: payment?.name ?? "", step: 2 },
+              ].map((row) => (
+                <div key={row.label} className="flex items-start justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <dt className="text-xs text-ink-500">{row.label}</dt>
+                    <dd className="mt-0.5 font-medium text-graphite">{row.value}</dd>
+                  </div>
+                  <button type="button" onClick={() => goTo(row.step)} className="shrink-0 text-xs font-semibold text-sage-700">
+                    {t("checkout.edit")}
+                  </button>
+                </div>
+              ))}
+            </dl>
+            {summary}
+            <div>{consentBox}</div>
+          </div>
+        )}
+
+        {/* телефон: кнопки шагов (на компьютере — одна кнопка в составе заказа) */}
+        <div className="flex gap-3 lg:hidden">
+          {step > 1 && (
+            <Button type="button" variant="secondary" size="lg" className="shrink-0 px-4" onClick={() => goTo(step - 1)} aria-label={t("checkout.prev")}>
+              <ArrowLeft />
+            </Button>
+          )}
+          {step < 3 ? (
+            <Button type="button" size="lg" className="min-w-0 flex-1" onClick={() => (step === 1 ? validateDetails() && goTo(2) : payment && goTo(3))}>
+              {t("checkout.next")}
+              <ArrowRight />
+            </Button>
+          ) : (
+            <Button type="submit" form="checkout-form" size="lg" className="min-w-0 flex-1" loading={pending} disabled={cart.hasProblems}>
+              {t("checkout.submitMobile", { total: formatMoney(total) })}
+            </Button>
+          )}
+        </div>
+      </div>
 
       <aside className="hidden space-y-4 lg:sticky lg:top-[150px] lg:block">
         {summary}
@@ -436,12 +540,6 @@ export function CheckoutForm({
         </div>
       </aside>
 
-      {/* кнопка подтверждения на телефоне */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
-        <Button type="submit" form="checkout-form" block size="lg" loading={pending} disabled={cart.hasProblems}>
-          {t("checkout.submitMobile", { total: formatMoney(total) })}
-        </Button>
-      </div>
     </div>
   );
 }

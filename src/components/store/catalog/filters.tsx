@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Slider } from "radix-ui";
-import { SlidersHorizontal } from "lucide-react";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Dialog, SheetContent } from "@/components/ui/primitives";
@@ -21,7 +21,26 @@ export type FiltersProps = {
   total: number;
 };
 
-function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
+// в мобильном списке фильтров (страница «Каталог») группы сворачиваются, как в мобильном макете
+const CollapsibleGroups = createContext(false);
+
+function FilterGroup({ title, summary, children }: { title: string; summary?: string | null; children: React.ReactNode }) {
+  const collapsible = useContext(CollapsibleGroups);
+  const [open, setOpen] = useState(false);
+  if (collapsible) {
+    return (
+      <div className="border-b border-line last:border-b-0">
+        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left">
+          <span className="text-[14px] font-medium text-graphite">{title}</span>
+          <span className="flex min-w-0 items-center gap-2 text-[12.5px] text-ink-500">
+            {summary && <span className="truncate">{summary}</span>}
+            <ChevronDown className={cn("size-4 shrink-0 transition-transform", open && "rotate-180")} />
+          </span>
+        </button>
+        {open && <div className="px-4 pb-4">{children}</div>}
+      </div>
+    );
+  }
   return (
     <div className="border-b border-line py-5 first:pt-0 last:border-b-0">
       <h3 className="mb-3 text-sm font-bold text-graphite">{title}</h3>
@@ -176,17 +195,22 @@ function FacetValues({ facet }: { facet: Facet }) {
 
 export function FiltersPanel({ facets, brands, priceRange, categoryFacet, showDiscount }: FiltersProps) {
   const t = useTranslations("listing");
+  const collapsible = useContext(CollapsibleGroups);
   const { list, toggleInList, update, searchParams } = useQueryState();
   const availability = list("avail");
   const discount = searchParams.get("disc");
   const hasActive = [...searchParams.keys()].some((k) => k.startsWith("f.") || ["pmin", "pmax", "avail", "brand", "disc", "cat"].includes(k));
+  const selectedCount = (count: number) => (count > 0 ? String(count) : null);
+  const floor = Math.floor(priceRange.min / 100) * 100;
+  const ceil = Math.max(floor + 100, Math.ceil(priceRange.max / 100) * 100);
+  const priceSummary = `${formatMoney(Number(searchParams.get("pmin") ?? floor))} – ${formatMoney(Number(searchParams.get("pmax") ?? ceil))}`;
 
   return (
     <div>
       {hasActive && (
         <button
           type="button"
-          className="mb-4 text-xs font-semibold text-sage-700 hover:underline"
+          className={cn("mb-4 text-xs font-semibold text-sage-700 hover:underline", collapsible && "mx-4 mt-3 mb-1")}
           onClick={() =>
             update((p) => {
               for (const key of [...p.keys()]) if (key.startsWith("f.") || ["pmin", "pmax", "avail", "brand", "disc", "cat"].includes(key)) p.delete(key);
@@ -198,7 +222,7 @@ export function FiltersPanel({ facets, brands, priceRange, categoryFacet, showDi
       )}
 
       {categoryFacet && categoryFacet.length > 0 && (
-        <FilterGroup title={t("category")}>
+        <FilterGroup title={t("category")} summary={selectedCount(categoryFacet.filter((c) => c.selected).length)}>
           <div className="space-y-2.5">
             {categoryFacet.map((c) => (
               <Checkbox
@@ -217,11 +241,11 @@ export function FiltersPanel({ facets, brands, priceRange, categoryFacet, showDi
         </FilterGroup>
       )}
 
-      <FilterGroup title={t("price")}>
+      <FilterGroup title={t("price")} summary={priceSummary}>
         <PriceFilter range={priceRange} />
       </FilterGroup>
 
-      <FilterGroup title={t("availability")}>
+      <FilterGroup title={t("availability")} summary={selectedCount(availability.length)}>
         <div className="space-y-2.5">
           <Checkbox checked={availability.includes("in_stock")} onChange={() => toggleInList("avail", "in_stock")} label={t("inStock")} />
           <Checkbox checked={availability.includes("backorder")} onChange={() => toggleInList("avail", "backorder")} label={t("backorder")} />
@@ -229,7 +253,7 @@ export function FiltersPanel({ facets, brands, priceRange, categoryFacet, showDi
       </FilterGroup>
 
       {showDiscount && (
-        <FilterGroup title={t("discount")}>
+        <FilterGroup title={t("discount")} summary={discount ? t("discountFrom", { value: discount }) : null}>
           <div className="space-y-2.5">
             {[10, 20, 30, 50].map((d) => (
               <Checkbox
@@ -249,13 +273,13 @@ export function FiltersPanel({ facets, brands, priceRange, categoryFacet, showDi
       )}
 
       {facets.map((facet) => (
-        <FilterGroup key={facet.code} title={facet.label}>
+        <FilterGroup key={facet.code} title={facet.label} summary={selectedCount(facet.values.filter((v) => v.selected).length)}>
           <FacetValues facet={facet} />
         </FilterGroup>
       ))}
 
       {brands.length > 0 && (
-        <FilterGroup title={t("brand")}>
+        <FilterGroup title={t("brand")} summary={selectedCount(brands.filter((b) => b.selected).length)}>
           <div className="space-y-2.5">
             {brands.map((b) => (
               <Checkbox
@@ -274,6 +298,24 @@ export function FiltersPanel({ facets, brands, priceRange, categoryFacet, showDi
         </FilterGroup>
       )}
     </div>
+  );
+}
+
+/** Фильтры списком на телефоне (страница «Каталог», как в мобильном макете) */
+export function FiltersInline(props: FiltersProps) {
+  const t = useTranslations("listing");
+  return (
+    <section className="mb-6 lg:hidden">
+      <h2 className="mb-3 flex items-center gap-2 text-[17px] font-bold text-graphite">
+        <SlidersHorizontal className="size-[18px]" />
+        {t("filters")}
+      </h2>
+      <div className="overflow-hidden rounded-xl border border-line bg-white">
+        <CollapsibleGroups.Provider value={true}>
+          <FiltersPanel {...props} />
+        </CollapsibleGroups.Provider>
+      </div>
+    </section>
   );
 }
 

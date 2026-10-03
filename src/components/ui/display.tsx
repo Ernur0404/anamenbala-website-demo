@@ -109,9 +109,9 @@ export function EmptyState({ icon, title, text, action, className }: { icon?: Re
 /** Заголовок секции: Cormorant Garamond + ссылка справа */
 export function SectionHeading({ title, subtitle, action, className, as: Tag = "h2" }: { title: ReactNode; subtitle?: ReactNode; action?: ReactNode; className?: string; as?: "h1" | "h2" | "h3" }) {
   return (
-    <div className={cn("mb-5 flex items-end justify-between gap-4 sm:mb-6", className)}>
+    <div className={cn("mb-3.5 flex items-end justify-between gap-4 sm:mb-6", className)}>
       <div className="min-w-0">
-        <Tag className="heading-section text-[28px] sm:text-[34px]">{title}</Tag>
+        <Tag className="heading-section text-[25px] sm:text-[34px]">{title}</Tag>
         {subtitle && <p className="mt-1 text-sm text-ink-500">{subtitle}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}

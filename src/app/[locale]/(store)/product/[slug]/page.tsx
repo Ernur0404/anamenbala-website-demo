@@ -6,6 +6,8 @@ import { getProductPage } from "@/server/catalog/product";
 import { getDeliveryMethods } from "@/server/content";
 import { getSetting } from "@/server/settings";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
+import { MobileCrumbs } from "@/components/store/mobile-title-bar";
+import { CollapsibleText } from "@/components/store/product/collapsible-text";
 import { ProductView } from "@/components/store/product/product-view";
 import { ProductTabs } from "@/components/store/product/product-tabs";
 import { AdvantagesStrip, ProductsSection } from "@/components/store/home/sections";
@@ -67,7 +69,9 @@ export default async function ProductPage({ params }: Props) {
   };
 
   const description = product.descriptionHtml ? (
-    <div className="rich-text max-w-3xl" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.descriptionHtml) }} />
+    <CollapsibleText>
+      <div className="rich-text max-w-3xl" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.descriptionHtml) }} />
+    </CollapsibleText>
   ) : (
     <p className="text-sm text-ink-500">{t("product.noDescription")}</p>
   );
@@ -103,7 +107,8 @@ export default async function ProductPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <TrackRecentlyViewed productId={product.id} />
       <div className="container-page pt-4 sm:pt-6">
-        <Breadcrumbs items={crumbs} className="mb-4 sm:mb-6" />
+        <Breadcrumbs items={crumbs} className="mb-6 hidden lg:block" />
+        <MobileCrumbs items={crumbs.slice(0, -1)} className="-mt-1 mb-3" />
         <ProductView
           id={product.id}
           name={product.name}
@@ -122,7 +127,8 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       <AdvantagesStrip
-        className="container-page mt-10"
+        className="container-page mt-6 lg:mt-10"
+        compact
         items={advantages.items.map((a) => ({ icon: a.icon, title: pickLocale(a.title, locale), text: pickLocale(a.text, locale) }))}
       />
 

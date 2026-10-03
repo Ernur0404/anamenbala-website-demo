@@ -4,7 +4,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { categoryPath, getCategoryIndex, isCategoryPublic } from "@/server/catalog/categories";
 import { listProducts, parseListingSearchParams } from "@/server/catalog/listing";
 import { categoryHref, childTiles, sidebarItems } from "@/server/catalog/navigation";
-import { getFreeDeliveryThreshold } from "@/server/content";
+import { getFreeDeliveryThreshold, getSectionProducts } from "@/server/content";
+import { getBrandTiles, getSaleOverview } from "@/server/catalog/landing";
+import { Breadcrumbs } from "@/components/store/breadcrumbs";
+import { ProductsSection } from "@/components/store/home/sections";
+import { BrandStrip, MobileHeroCard, SalePromoStrip, SubcategoryCircles, SubcategoryGrid } from "@/components/store/catalog/mobile-blocks";
 import { toImage } from "@/server/catalog/cards";
 import { PageHero } from "@/components/store/page-hero";
 import { CatalogView } from "@/components/store/catalog/catalog-view";
@@ -52,7 +56,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const name = tr(category, "name", locale);
   const isRoot = category.parentId === null;
 
-  const [listing, threshold] = await Promise.all([
+  const [listing, threshold, sale, popular] = await Promise.all([
     listProducts({
       locale,
       categoryId: category.id,
@@ -66,6 +70,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       page: parsed.page,
     }),
     getFreeDeliveryThreshold(),
+    getSaleOverview(),
+    isRoot ? getSectionProducts({ source: "category", categorySlug: category.slug, limit: 8 }, locale) : Promise.resolve([]),
   ]);
 
   const crumbs = [
@@ -79,9 +85,47 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     .find((c) => c.heroImage)?.heroImage;
   const promoVariant = category.slug === "dlya-sebya" || index.byId.get(category.parentId ?? "")?.slug === "dlya-sebya" ? "gift" : "delivery";
 
+  // мобильная версия раздела (по мобильному макету)
+  const href = categoryHref(index, category.id);
+  const children = isRoot ? childTiles(index, locale, category.id) : [];
+  const tone = promoVariant === "gift" ? "powder" : "sage";
+  const deals = sale.byCategory[category.id];
+  const brandTiles = isRoot ? await getBrandTiles(listing.brands.map((b) => b.slug)) : [];
+  const heroTitle = trOrNull(category, "heroTitle", locale) ?? name;
+  const heroText = trOrNull(category, "heroText", locale) ?? trOrNull(category, "description", locale);
+
   return (
     <>
+      <div className="container-page lg:hidden">
+        <Breadcrumbs items={crumbs} className="scrollbar-none -mx-4 overflow-x-auto px-4 pt-3 pb-3 [&_ol]:flex-nowrap [&_ol]:whitespace-nowrap" />
+        <MobileHeroCard title={heroTitle} text={heroText} image={toImage(heroImage ?? null, name)} button={{ label: t("landing.goToProducts"), href: "#products" }} />
+        {isRoot && (
+          <div className="mt-5 space-y-8">
+            <SubcategoryCircles items={children} tone={tone} />
+          </div>
+        )}
+      </div>
+      {isRoot && (
+        <div className="lg:hidden">
+          <ProductsSection title={t("landing.popular")} href={`${href}#products`} products={popular} viewAll={t("common.viewAll")} mobilePerView={3} />
+          <div className="container-page mt-9 space-y-9">
+            {deals && deals.maxDiscount > 0 && (
+              <SalePromoStrip
+                title={t("landing.saleUpTo", { percent: deals.maxDiscount })}
+                text={t("landing.saleIn", { name })}
+                href={`/sale?cat=${category.slug}`}
+                image={toImage(category.tileImage, name)}
+                button={t("landing.go")}
+                tone={tone}
+              />
+            )}
+            <SubcategoryGrid title={t("landing.categories")} items={children} />
+            <BrandStrip title={t("landing.brands")} brands={brandTiles} />
+          </div>
+        </div>
+      )}
       <PageHero
+        mobile="none"
         title={trOrNull(category, "heroTitle", locale) ?? name}
         subtitle={trOrNull(category, "heroText", locale) ?? trOrNull(category, "description", locale)}
         script={trOrNull(category, "heroScript", locale)}

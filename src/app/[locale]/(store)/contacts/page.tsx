@@ -43,7 +43,7 @@ export default async function ContactsPage({ params }: { params: Promise<{ local
     <>
       <PageHero title={title} subtitle={trOrNull(page, "subtitle", locale)} script={trOrNull(page, "script", locale)} image={toImage(page.heroImage, title)} breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: title }]} />
 
-      <section className="container-page mt-10 grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <section className="container-page mt-4 grid gap-6 lg:mt-10 lg:grid-cols-[1fr_1fr]">
         <div>
           <h2 className="heading-section mb-5 text-[32px]">{t("pages.contactUs")}</h2>
           <div className="space-y-3">

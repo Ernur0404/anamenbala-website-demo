@@ -16,7 +16,7 @@ export async function StaticPage({ slug, locale }: { slug: string; locale: Local
   return (
     <>
       <PageHero title={title} subtitle={trOrNull(page, "subtitle", locale)} script={trOrNull(page, "script", locale)} image={toImage(page.heroImage, title)} compact breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: title }]} />
-      <article className="container-page mt-8">
+      <article className="container-page mt-4 lg:mt-8">
         <div className="rich-text max-w-3xl rounded-2xl border border-line bg-white p-6 text-[15px] sm:p-10" dangerouslySetInnerHTML={{ __html: sanitizeHtml(body ?? "") }} />
       </article>
     </>

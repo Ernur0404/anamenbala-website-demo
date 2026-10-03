@@ -79,7 +79,19 @@ export function ProductView(product: Props) {
 
       <div className="min-w-0">
         {product.subtitle && <p className="text-[13px] font-semibold text-sage-700">{product.subtitle}</p>}
-        <h1 className="heading-display mt-1.5 text-[32px] sm:text-[40px]">{product.name}</h1>
+        <div className="mt-1.5 flex items-start gap-3">
+          <h1 className="heading-display min-w-0 flex-1 text-[26px] sm:text-[40px]">{product.name}</h1>
+          {/* избранное рядом с названием — на телефоне, как в мобильном макете */}
+          <button
+            type="button"
+            onClick={() => toggleFavorite(product.id)}
+            aria-pressed={favorite}
+            aria-label={favorite ? t("inFavorites") : t("addToFavorites")}
+            className="-mt-1 -mr-2 grid size-10 shrink-0 place-items-center rounded-full text-graphite transition-colors hover:bg-beige-100 lg:hidden"
+          >
+            <Heart className={cn("size-[22px] stroke-[1.7]", favorite && "fill-powder-500 text-powder-500")} />
+          </button>
+        </div>
         {product.ratingCount > 0 && (
           <a href="#reviews" className="mt-2 inline-flex">
             <Rating value={product.rating} count={product.ratingCount} size="md" />
@@ -87,8 +99,8 @@ export function ProductView(product: Props) {
         )}
 
         {shown && (
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <Price value={shown.price} oldValue={shown.oldPrice} size="xl" />
+          <div className="mt-3 flex flex-wrap items-center gap-3 sm:mt-5">
+            <Price value={shown.price} oldValue={shown.oldPrice} size="xl" className="max-sm:[&>span:first-child]:text-[24px]" />
             {shown.discountPercent > 0 && <ProductBadge style="DISCOUNT">−{shown.discountPercent}%</ProductBadge>}
           </div>
         )}
@@ -115,23 +127,27 @@ export function ProductView(product: Props) {
           </div>
         )}
 
-        <div className="mt-6">
+        <div className="mt-6 hidden lg:block">
           <p className="mb-2.5 text-sm text-ink-600">{t("quantity")}:</p>
           <QuantityStepper value={qty} onChange={setQuantity} max={maxQty} disabled={!canBuy} />
         </div>
 
-        <div ref={buttonsRef} className="mt-6 space-y-3 sm:max-w-md">
-          <Button block size="lg" onClick={() => add("cart")} loading={busy === "cart"} disabled={Boolean(variant) && !canBuy}>
-            <ShoppingBag />
-            {buttonLabel}
-          </Button>
+        <div ref={buttonsRef} className="mt-5 space-y-3 sm:max-w-md lg:mt-6">
+          {/* на телефоне количество и «В корзину» в одной строке */}
+          <div className="flex gap-3">
+            <QuantityStepper value={qty} onChange={setQuantity} max={maxQty} disabled={!canBuy} className="h-[52px] shrink-0 lg:hidden" />
+            <Button block size="lg" className="min-w-0 flex-1" onClick={() => add("cart")} loading={busy === "cart"} disabled={Boolean(variant) && !canBuy}>
+              <ShoppingBag />
+              {buttonLabel}
+            </Button>
+          </div>
           <Button block size="lg" variant="powder" onClick={() => add("buy")} loading={busy === "buy"} disabled={Boolean(variant) && !canBuy}>
             {t("buyNow")}
           </Button>
           <button
             type="button"
             onClick={() => toggleFavorite(product.id)}
-            className="mx-auto flex items-center gap-2 py-1 text-sm font-semibold text-ink-700 transition-colors hover:text-powder-700"
+            className="mx-auto hidden items-center gap-2 py-1 text-sm font-semibold text-ink-700 transition-colors hover:text-powder-700 lg:flex"
             aria-pressed={favorite}
           >
             <Heart className={cn("size-[18px]", favorite && "fill-powder-500 text-powder-500")} />

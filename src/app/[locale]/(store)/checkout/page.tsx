@@ -53,7 +53,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ local
         compact
         breadcrumbs={[{ label: t("common.home"), href: "/" }, { label: t("cart.title"), href: "/cart" }, { label: hero?.title ?? t("checkout.title") }]}
       />
-      <div className="container-page mt-6 sm:mt-8">
+      <div className="container-page mt-3 lg:mt-8">
         {cart && deliveries.length ? (
           <CheckoutForm
             cart={cart}

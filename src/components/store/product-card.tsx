@@ -37,7 +37,8 @@ export function FavoriteButton({ productId, className, size = "md" }: { productI
   );
 }
 
-export function ProductCard({ product, className }: { product: ProductCardData; className?: string }) {
+/** compact — узкая карточка (по три в ленте на телефоне): мельче цена и кнопка, один бейдж */
+export function ProductCard({ product, className, compact }: { product: ProductCardData; className?: string; compact?: boolean }) {
   const t = useTranslations("product");
   const { addToCart } = useStore();
   const [quickOpen, setQuickOpen] = useState(false);
@@ -57,7 +58,7 @@ export function ProductCard({ product, className }: { product: ProductCardData; 
   };
 
   return (
-    <article className={cn("group relative flex h-full flex-col rounded-lg border border-line bg-white p-2 transition-shadow duration-200 hover:shadow-card sm:p-2.5", className)}>
+    <article className={cn("group relative flex h-full flex-col rounded-lg border border-line bg-white transition-shadow duration-200 hover:shadow-card sm:p-2.5", compact ? "p-1.5" : "p-2", className)}>
       <Link href={href} className="relative block aspect-[6/5] overflow-hidden rounded-md bg-beige-50" tabIndex={-1}>
         {product.image ? (
           <>
@@ -79,13 +80,14 @@ export function ProductCard({ product, className }: { product: ProductCardData; 
             <ImageOff className="size-8" />
           </span>
         )}
-        <span className="absolute top-2 left-2 flex flex-col items-start gap-1">
+        <span className={cn("absolute top-2 left-2 flex flex-col items-start gap-1", compact && "top-1.5 left-1.5")}>
+          {compact && product.discountPercent > 0 && <ProductBadge style="DISCOUNT">−{product.discountPercent}%</ProductBadge>}
           {product.badges.slice(0, 2).map((b) => (
-            <ProductBadge key={b.label} style={b.style}>
+            <ProductBadge key={b.label} style={b.style} className={compact ? "max-sm:hidden" : undefined}>
               {b.label}
             </ProductBadge>
           ))}
-          {product.discountPercent > 0 && <ProductBadge style="DISCOUNT">−{product.discountPercent}%</ProductBadge>}
+          {!compact && product.discountPercent > 0 && <ProductBadge style="DISCOUNT">−{product.discountPercent}%</ProductBadge>}
         </span>
         {!available && (
           <span className="absolute bottom-2 left-2 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-ink-600 shadow-soft">{t("outOfStock")}</span>
@@ -94,21 +96,30 @@ export function ProductCard({ product, className }: { product: ProductCardData; 
           <span className="absolute bottom-2 left-2 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-sky-700 shadow-soft">{t("backorder")}</span>
         )}
       </Link>
-      <FavoriteButton productId={product.id} className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4" />
+      <FavoriteButton productId={product.id} className={cn("absolute sm:top-4 sm:right-4", compact ? "top-2.5 right-2.5 max-sm:size-7" : "top-3.5 right-3.5")} />
 
-      <div className="flex flex-1 flex-col px-1 pt-2.5 pb-0.5 sm:pt-3">
-        <Link href={href} className="line-clamp-2 min-h-[2.7em] text-[13px] leading-snug font-medium text-graphite transition-colors hover:text-sage-700 sm:text-[14px]">
+      <div className={cn("flex flex-1 flex-col pb-0.5 sm:px-1 sm:pt-3", compact ? "px-0.5 pt-2" : "px-1 pt-2.5")}>
+        <Link href={href} className={cn("line-clamp-2 min-h-[2.7em] leading-snug font-medium text-graphite transition-colors hover:text-sage-700 sm:text-[14px]", compact ? "text-[12px]" : "text-[13px]")}>
           {product.name}
         </Link>
         <Rating className="mt-1.5" value={product.rating} count={product.ratingCount} />
         <div className="mt-auto flex items-end justify-between gap-2 pt-2.5">
-          <Price value={product.price} oldValue={product.oldPrice} from={product.fromPrice} size="sm" className="min-w-0" />
+          <Price
+            value={product.price}
+            oldValue={product.oldPrice}
+            from={product.fromPrice}
+            size="sm"
+            className={cn("min-w-0", compact && "gap-y-0 max-sm:[&>span:first-child]:text-[13px] max-sm:[&>span:last-child]:text-[10.5px]")}
+          />
           <button
             type="button"
             onClick={onCart}
             disabled={!available || adding}
             aria-label={t("addToCart")}
-            className="grid size-9 shrink-0 place-items-center rounded-md bg-sage-700 text-white transition-colors hover:bg-sage-800 disabled:bg-line-strong disabled:text-white"
+            className={cn(
+              "grid shrink-0 place-items-center rounded-md bg-sage-700 text-white transition-colors hover:bg-sage-800 disabled:bg-line-strong disabled:text-white sm:size-9",
+              compact ? "size-8 [&_svg]:size-4 sm:[&_svg]:size-[18px]" : "size-9",
+            )}
           >
             {adding ? <LoaderCircle className="size-[18px] animate-spin" /> : <ShoppingBag className="size-[18px]" />}
           </button>

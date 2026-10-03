@@ -15,9 +15,6 @@ export function BottomNav() {
   const { cartCount, favorites } = useStore();
   const { setOpen } = useMobileMenu();
 
-  // на оформлении заказа внизу экрана — кнопка подтверждения
-  if (pathname === "/checkout") return null;
-
   const item = (active: boolean) =>
     cn("flex flex-1 flex-col items-center justify-center gap-0.5 pt-1.5 text-[10.5px] font-semibold transition-colors", active ? "text-sage-700" : "text-ink-500");
 

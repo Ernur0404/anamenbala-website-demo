@@ -41,12 +41,20 @@ export function ProductTabs({
   }, []);
 
   return (
-    <Tabs value={tab} onValueChange={setTab} id="reviews" className="scroll-mt-40 rounded-xl border border-line bg-white px-4 pb-6 sm:px-7">
-      <TabsList className="-mx-4 px-2 sm:-mx-7 sm:px-5">
-        <TabsTrigger value="description">{t("product.description")}</TabsTrigger>
-        <TabsTrigger value="specs">{t("product.specs")}</TabsTrigger>
-        <TabsTrigger value="delivery">{t("product.delivery")}</TabsTrigger>
-        <TabsTrigger value="reviews">{t("product.reviewsCount", { count: reviewTotal })}</TabsTrigger>
+    <Tabs value={tab} onValueChange={setTab} id="reviews" className="scroll-mt-40 lg:rounded-xl lg:border lg:border-line lg:bg-white lg:px-7 lg:pb-6">
+      <TabsList className="lg:-mx-7 lg:px-5">
+        <TabsTrigger value="description" className="max-lg:px-3 max-lg:first:pl-0 max-lg:data-[state=active]:text-sage-700">
+          {t("product.description")}
+        </TabsTrigger>
+        <TabsTrigger value="specs" className="max-lg:px-3 max-lg:data-[state=active]:text-sage-700">
+          {t("product.specs")}
+        </TabsTrigger>
+        <TabsTrigger value="delivery" className="max-lg:px-3 max-lg:data-[state=active]:text-sage-700">
+          {t("product.delivery")}
+        </TabsTrigger>
+        <TabsTrigger value="reviews" className="max-lg:px-3 max-lg:data-[state=active]:text-sage-700">
+          {t("product.reviewsCount", { count: reviewTotal })}
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="description">{description}</TabsContent>
