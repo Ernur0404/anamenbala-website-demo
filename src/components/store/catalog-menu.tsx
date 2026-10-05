@@ -214,6 +214,7 @@ export function MobileMenu({ categories, contacts }: { categories: MenuCategory[
             <div className="mx-3 my-3 border-t border-line" />
             {[
               { href: "/about", label: t("about") },
+              { href: "/reviews", label: t("reviews") },
               { href: "/delivery", label: t("delivery") },
               { href: "/contacts", label: t("contacts") },
               { href: "/faq", label: t("faq") },

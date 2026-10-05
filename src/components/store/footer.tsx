@@ -52,7 +52,7 @@ export async function Footer({
           </div>
         </div>
 
-        <div>
+        <div className="hidden lg:block">
           <h3 className="mb-4 text-sm font-bold">{t("footer.forCustomers")}</h3>
           <ul className={col}>
             <li><Link className={link} href="/delivery">{t("nav.delivery")}</Link></li>
@@ -61,7 +61,7 @@ export async function Footer({
           </ul>
         </div>
 
-        <div>
+        <div className="hidden lg:block">
           <h3 className="mb-4 text-sm font-bold">{t("footer.catalog")}</h3>
           <ul className={col}>
             {categories.map((c) => (
@@ -71,7 +71,7 @@ export async function Footer({
           </ul>
         </div>
 
-        <div>
+        <div className="hidden lg:block">
           <h3 className="mb-4 text-sm font-bold">{t("footer.about")}</h3>
           <ul className={col}>
             <li><Link className={link} href="/about">{t("footer.aboutUs")}</Link></li>
