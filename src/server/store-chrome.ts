@@ -46,7 +46,8 @@ export async function getStoreChrome(locale: Locale) {
     telegram: contacts.telegram,
   };
 
-  const builtIn = new Set(["about", "delivery", "contacts", "faq", "returns"]);
+  // встроенные страницы в подвал не попадают (возврат, политика и оферта — в меню ☰)
+  const builtIn = new Set(["about", "delivery", "contacts", "faq", "returns", "privacy", "offer"]);
   return {
     storeName: general.storeName,
     tagline: pickLocale(general.tagline, locale),

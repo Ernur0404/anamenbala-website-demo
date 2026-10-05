@@ -118,6 +118,17 @@ export function CategoryNav({ categories }: { categories: MenuCategory[] }) {
                 <Percent className="size-4" />
                 {t("sale")}
               </Link>
+              <span className="ml-auto flex items-center gap-5 text-[13px] font-medium text-ink-500">
+                <Link href="/returns" className="hover:text-sage-700">
+                  {t("returns")}
+                </Link>
+                <Link href="/privacy" className="hover:text-sage-700">
+                  {t("privacy")}
+                </Link>
+                <Link href="/offer" className="hover:text-sage-700">
+                  {t("offer")}
+                </Link>
+              </span>
             </div>
           </div>
         </div>
@@ -206,6 +217,9 @@ export function MobileMenu({ categories, contacts }: { categories: MenuCategory[
               { href: "/delivery", label: t("delivery") },
               { href: "/contacts", label: t("contacts") },
               { href: "/faq", label: t("faq") },
+              { href: "/returns", label: t("returns") },
+              { href: "/privacy", label: t("privacy") },
+              { href: "/offer", label: t("offer") },
             ].map((l) => (
               <Link key={l.href} href={l.href} className="block rounded-md px-3 py-2 text-[15px] text-ink-700 hover:bg-beige-50">
                 {l.label}

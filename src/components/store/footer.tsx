@@ -56,7 +56,6 @@ export async function Footer({
           <h3 className="mb-4 text-sm font-bold">{t("footer.forCustomers")}</h3>
           <ul className={col}>
             <li><Link className={link} href="/delivery">{t("nav.delivery")}</Link></li>
-            <li><Link className={link} href="/returns">{t("footer.returns")}</Link></li>
             <li><Link className={link} href="/faq">{t("nav.faq")}</Link></li>
             <li><Link className={link} href="/contacts">{t("nav.contacts")}</Link></li>
           </ul>
@@ -78,7 +77,7 @@ export async function Footer({
             <li><Link className={link} href="/about">{t("footer.aboutUs")}</Link></li>
             <li><Link className={link} href="/reviews">{t("footer.reviews")}</Link></li>
             {extraPages.map((p) => (
-              <li key={p.slug}><Link className={link} href={p.slug === "privacy" || p.slug === "offer" ? `/${p.slug}` : `/p/${p.slug}`}>{p.title}</Link></li>
+              <li key={p.slug}><Link className={link} href={`/p/${p.slug}`}>{p.title}</Link></li>
             ))}
           </ul>
         </div>
