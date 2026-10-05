@@ -91,7 +91,8 @@ export async function Footer({
           </div>
         </div>
       </div>
-      <div className="border-t border-line">
+      {/* на телефоне копирайт — в меню ☰, способы оплаты видны при оформлении */}
+      <div className="hidden border-t border-line lg:block">
         <div className="container-page flex flex-col gap-3 py-5 text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
           <p>{t("footer.rights", { year: new Date().getFullYear() })}</p>
           <div className="flex items-center gap-2" aria-label={t("footer.payments")}>

@@ -139,7 +139,7 @@ export function CategoryNav({ categories }: { categories: MenuCategory[] }) {
 
 // ───────────── мобильное меню (шторка слева) ─────────────
 
-export function MobileMenu({ categories, contacts }: { categories: MenuCategory[]; contacts: { phone: string; whatsapp: string } }) {
+export function MobileMenu({ categories, contacts, copyright }: { categories: MenuCategory[]; contacts: { phone: string; whatsapp: string }; copyright: string }) {
   const t = useTranslations("nav");
   const { open, setOpen } = useMobileMenu();
   const pathname = usePathname();
@@ -226,6 +226,7 @@ export function MobileMenu({ categories, contacts }: { categories: MenuCategory[
                 {l.label}
               </Link>
             ))}
+            <p className="px-3 pt-4 pb-2 text-xs text-ink-400">{copyright}</p>
           </div>
           <div className="space-y-3 border-t border-line bg-white px-4 py-4 pb-[max(16px,env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-between">

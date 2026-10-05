@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getStoreChrome } from "@/server/store-chrome";
 import { getCartCount, getFavoriteIds } from "@/server/store-session";
 import { getCurrentUser } from "@/server/auth/customer";
@@ -19,7 +19,8 @@ import type { Locale } from "@/lib/l10n";
 export default async function StoreLayout({ children, params }: { children: ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [chrome, cartCount, favorites, user, notificationCount] = await Promise.all([
+  const [t, chrome, cartCount, favorites, user, notificationCount] = await Promise.all([
+    getTranslations("footer"),
     getStoreChrome(locale as Locale),
     getCartCount(),
     getFavoriteIds(),
@@ -56,7 +57,11 @@ export default async function StoreLayout({ children, params }: { children: Reac
           <Footer storeName={chrome.storeName} tagline={chrome.tagline} categories={chrome.menu} contacts={chrome.contacts} extraPages={chrome.footerPages} />
           <div className="h-16 lg:hidden" aria-hidden />
           <BottomNav />
-          <MobileMenu categories={chrome.menu} contacts={{ phone: chrome.contacts.phone, whatsapp: chrome.contacts.whatsapp }} />
+          <MobileMenu
+            categories={chrome.menu}
+            contacts={{ phone: chrome.contacts.phone, whatsapp: chrome.contacts.whatsapp }}
+            copyright={t("rights", { year: new Date().getFullYear() })}
+          />
         </div>
       </MobileMenuProvider>
     </StoreProvider>
