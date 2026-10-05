@@ -9,6 +9,9 @@ import { useRouter } from "@/i18n/navigation";
 type StoreState = {
   cartCount: number;
   setCartCount: (count: number) => void;
+  /** Непрочитанные уведомления (колокольчик) */
+  notificationCount: number;
+  setNotificationCount: (count: number) => void;
   favorites: Set<string>;
   isFavorite: (productId: string) => boolean;
   toggleFavorite: (productId: string) => Promise<void>;
@@ -18,10 +21,27 @@ type StoreState = {
 
 const StoreContext = createContext<StoreState | null>(null);
 
-export function StoreProvider({ initialCartCount, initialFavorites, children }: { initialCartCount: number; initialFavorites: string[]; children: ReactNode }) {
+export function StoreProvider({
+  initialCartCount,
+  initialFavorites,
+  initialNotificationCount = 0,
+  children,
+}: {
+  initialCartCount: number;
+  initialFavorites: string[];
+  initialNotificationCount?: number;
+  children: ReactNode;
+}) {
   const t = useTranslations();
   const router = useRouter();
   const [cartCount, setCartCount] = useState(initialCartCount);
+  const [notificationCount, setNotificationCount] = useState(initialNotificationCount);
+  // сервер пересчитал (новый заказ, обновление страницы) — показываем свежее число
+  const [serverNotificationCount, setServerNotificationCount] = useState(initialNotificationCount);
+  if (serverNotificationCount !== initialNotificationCount) {
+    setServerNotificationCount(initialNotificationCount);
+    setNotificationCount(initialNotificationCount);
+  }
   const [favorites, setFavorites] = useState(() => new Set(initialFavorites));
   const [pending, startTransition] = useTransition();
 
@@ -73,13 +93,15 @@ export function StoreProvider({ initialCartCount, initialFavorites, children }: 
     () => ({
       cartCount,
       setCartCount,
+      notificationCount,
+      setNotificationCount,
       favorites,
       isFavorite: (id) => favorites.has(id),
       toggleFavorite,
       addToCart,
       pending,
     }),
-    [cartCount, favorites, toggleFavorite, addToCart, pending],
+    [cartCount, notificationCount, favorites, toggleFavorite, addToCart, pending],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

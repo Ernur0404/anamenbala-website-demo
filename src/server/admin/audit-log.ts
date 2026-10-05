@@ -13,7 +13,7 @@ export const AUDIT_GROUPS = {
   promotions: ["promotion", "promo_code"],
   customers: ["customer", "contact_message", "subscriber"],
   reviews: ["review"],
-  content: ["banner", "page", "faq", "home_section", "instagram"],
+  content: ["banner", "page", "faq", "announcement", "home_section", "instagram"],
   settings: ["setting"],
   staff: ["staff"],
   data: ["export", "import"],

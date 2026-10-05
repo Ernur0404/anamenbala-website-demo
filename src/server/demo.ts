@@ -26,14 +26,15 @@ export async function saveDemoRegistry(registry: DemoRegistry) {
 }
 
 export async function demoStats() {
-  const [products, orders, customers, media, registry] = await Promise.all([
+  const [products, orders, customers, media, announcements, registry] = await Promise.all([
     db.product.count({ where: { isDemo: true } }),
     db.order.count({ where: { isDemo: true } }),
     db.customer.count({ where: { isDemo: true } }),
     db.media.count({ where: { isDemo: true } }),
+    db.announcement.count({ where: { isDemo: true } }),
     getDemoRegistry(),
   ]);
-  return { products, orders, customers, media, brands: registry.brandIds.length, promotions: registry.promotionIds.length + registry.promoCodeIds.length };
+  return { products, orders, customers, media, announcements, brands: registry.brandIds.length, promotions: registry.promotionIds.length + registry.promoCodeIds.length };
 }
 
 export async function deleteDemoData() {
@@ -47,6 +48,7 @@ export async function deleteDemoData() {
     await tx.customer.deleteMany({ where: { isDemo: true, orders: { none: {} } } });
     await tx.product.deleteMany({ where: { isDemo: true } });
     await tx.instagramPost.deleteMany({ where: { isDemo: true } });
+    await tx.announcement.deleteMany({ where: { isDemo: true } });
     await tx.promoCode.deleteMany({ where: { id: { in: registry.promoCodeIds } } });
     await tx.promotion.deleteMany({ where: { id: { in: registry.promotionIds } } });
     await tx.brand.deleteMany({ where: { id: { in: registry.brandIds }, products: { none: {} } } });

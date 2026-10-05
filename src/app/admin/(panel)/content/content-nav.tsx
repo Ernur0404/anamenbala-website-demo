@@ -2,13 +2,14 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 
-export type ContentTab = "home" | "categories" | "pages" | "faq" | "instagram" | "header";
+export type ContentTab = "home" | "categories" | "pages" | "faq" | "news" | "instagram" | "header";
 
 const TABS: { key: ContentTab; href: string }[] = [
   { key: "home", href: "/admin/content" },
   { key: "categories", href: "/admin/content/categories" },
   { key: "pages", href: "/admin/content/pages" },
   { key: "faq", href: "/admin/content/faq" },
+  { key: "news", href: "/admin/content/news" },
   { key: "instagram", href: "/admin/content/instagram" },
   { key: "header", href: "/admin/content/header" },
 ];

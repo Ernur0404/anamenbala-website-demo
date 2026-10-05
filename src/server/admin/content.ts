@@ -1,4 +1,4 @@
-/** Контент витрины в админке: баннеры, блоки главной, страницы, вопросы-ответы, Instagram */
+/** Контент витрины в админке: баннеры, блоки главной, страницы, вопросы-ответы, объявления, Instagram */
 import { z } from "zod";
 import { db } from "../db";
 import type { Prisma } from "@/generated/prisma/client";
@@ -280,6 +280,53 @@ export async function moveFaq(id: string, direction: "up" | "down", actor: Admin
 export async function deleteFaq(id: string, actor: AdminActor) {
   await db.faqItem.delete({ where: { id } }).catch(() => null);
   await done(actor, "faq.delete", "Удалён вопрос", "faq", id);
+}
+
+// ───────────── объявления (колокольчик «Уведомления» на сайте) ─────────────
+
+export const announcementSchema = z.object({
+  id: z.string().optional().nullable(),
+  titleRu: z.string().trim().min(1).max(120),
+  titleKk: text(120),
+  textRu: text(600),
+  textKk: text(600),
+  url: z.string().trim().max(300).optional().nullable(),
+  startsAt: dateKey,
+  endsAt: dateKey,
+  isActive: z.boolean(),
+});
+
+export async function saveAnnouncement(raw: z.input<typeof announcementSchema>, actor: AdminActor) {
+  const input = announcementSchema.parse(raw);
+  const url = blank(input.url);
+  if (url && !url.startsWith("/") && !/^https?:\/\//.test(url)) throw new DomainError("VALIDATION", "Ссылка", { fieldErrors: { url: "invalid" } });
+  const startsAt = input.startsAt ? storeDayStart(input.startsAt) : null;
+  const endsAt = input.endsAt ? addDays(storeDayStart(input.endsAt), 1) : null;
+  if (startsAt && endsAt && endsAt <= startsAt) throw new DomainError("VALIDATION", "Окончание раньше начала", { fieldErrors: { endsAt: "invalid" } });
+  const data = {
+    titleRu: input.titleRu,
+    titleKk: blank(input.titleKk),
+    textRu: blank(input.textRu),
+    textKk: blank(input.textKk),
+    url,
+    startsAt,
+    endsAt,
+    isActive: input.isActive,
+  };
+  const id = input.id ? (await db.announcement.update({ where: { id: input.id }, data })).id : (await db.announcement.create({ data })).id;
+  await done(actor, input.id ? "announcement.update" : "announcement.create", `Объявление «${input.titleRu.slice(0, 80)}»`, "announcement", id);
+  return { id };
+}
+
+export async function toggleAnnouncement(id: string, isActive: boolean, actor: AdminActor) {
+  const a = await db.announcement.update({ where: { id }, data: { isActive } });
+  await done(actor, "announcement.toggle", `Объявление «${a.titleRu.slice(0, 80)}»: ${isActive ? "показано" : "скрыто"}`, "announcement", id);
+}
+
+export async function deleteAnnouncement(id: string, actor: AdminActor) {
+  const a = await db.announcement.delete({ where: { id } }).catch(() => null);
+  if (!a) throw new DomainError("NOT_FOUND");
+  await done(actor, "announcement.delete", `Удалено объявление «${a.titleRu.slice(0, 80)}»`, "announcement", id);
 }
 
 // ───────────── Instagram ─────────────

@@ -795,6 +795,7 @@ model Order {
   @@index([createdAt])
   @@index([customerId])
   @@index([customerPhone])
+  @@index([userId, createdAt])
 }
 
 model OrderItem {
@@ -1168,6 +1169,26 @@ model InstagramPost {
   isActive  Boolean  @default(true)
   isDemo    Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+/// Объявления магазина для покупателей (колокольчик «Уведомления» на сайте)
+model Announcement {
+  id        String    @id @default(cuid())
+  titleRu   String
+  titleKk   String?
+  textRu    String?
+  textKk    String?
+  /// Ссылка: путь на сайте (/sale) или полный адрес
+  url       String?
+  isActive  Boolean   @default(true)
+  /// Показывать с / по (по времени магазина); дата «с» — это и дата уведомления
+  startsAt  DateTime?
+  endsAt    DateTime?
+  isDemo    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([isActive, startsAt])
 }
 
 enum MessageStatus {

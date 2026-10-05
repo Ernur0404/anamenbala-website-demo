@@ -195,6 +195,18 @@ async function main() {
     });
     registry.promoCodeIds.push(code.id);
   }
+
+  // ── пример объявления в «Уведомлениях» (удаляется вместе с демо-данными) ──
+  await db.announcement.create({
+    data: {
+      titleRu: "Мы открыли интернет-магазин!",
+      titleKk: "Біз интернет-дүкен аштық!",
+      textRu: "Теперь заказывать можно прямо на сайте — с доставкой по Ганюшкино и всему Казахстану",
+      textKk: "Енді тапсырысты тікелей сайттан беруге болады — Ганюшкино мен бүкіл Қазақстан бойынша жеткізумен",
+      url: "/delivery",
+      isDemo: true,
+    },
+  });
   clearCache();
   await refreshProductIndex(productIds);
 

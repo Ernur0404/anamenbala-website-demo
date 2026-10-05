@@ -22,7 +22,7 @@ export default async function DemoSettingsPage() {
     { label: t("customers"), value: stats.customers, icon: Users },
     { label: t("banners"), value: stats.media, icon: ImageIcon },
   ];
-  const any = stats.products + stats.orders + stats.customers + stats.media + stats.brands + stats.promotions > 0;
+  const any = stats.products + stats.orders + stats.customers + stats.media + stats.announcements + stats.brands + stats.promotions > 0;
   return (
     <>
       <PageHeader title={ts("title")} subtitle={ts("subtitle")} />

@@ -3,11 +3,12 @@ import { setRequestLocale } from "next-intl/server";
 import { getStoreChrome } from "@/server/store-chrome";
 import { getCartCount, getFavoriteIds } from "@/server/store-session";
 import { getCurrentUser } from "@/server/auth/customer";
+import { getUnreadNotificationCount } from "@/server/notification-feed";
 import { StoreProvider } from "@/components/store/store-provider";
 import { TopBar } from "@/components/store/top-bar";
 import { Logo } from "@/components/store/logo";
 import { SearchBox } from "@/components/store/search-box";
-import { HeaderActions, MobileAccountButton, MobileCartButton } from "@/components/store/header-actions";
+import { HeaderActions, MobileAccountButton, MobileNotificationsButton } from "@/components/store/header-actions";
 import { MobileSearchButton } from "@/components/store/mobile-search";
 import { NavigationHistory } from "@/components/store/mobile-title-bar";
 import { CategoryNav, MobileMenu, MobileMenuButton, MobileMenuProvider } from "@/components/store/catalog-menu";
@@ -18,10 +19,16 @@ import type { Locale } from "@/lib/l10n";
 export default async function StoreLayout({ children, params }: { children: ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [chrome, cartCount, favorites, user] = await Promise.all([getStoreChrome(locale as Locale), getCartCount(), getFavoriteIds(), getCurrentUser()]);
+  const [chrome, cartCount, favorites, user, notificationCount] = await Promise.all([
+    getStoreChrome(locale as Locale),
+    getCartCount(),
+    getFavoriteIds(),
+    getCurrentUser(),
+    getUnreadNotificationCount(),
+  ]);
 
   return (
-    <StoreProvider initialCartCount={cartCount} initialFavorites={favorites}>
+    <StoreProvider initialCartCount={cartCount} initialFavorites={favorites} initialNotificationCount={notificationCount}>
       <MobileMenuProvider>
         <div className="flex min-h-dvh flex-col">
           <NavigationHistory />
@@ -38,7 +45,7 @@ export default async function StoreLayout({ children, params }: { children: Reac
               <div className="-mr-1.5 ml-auto flex items-center lg:hidden">
                 <MobileSearchButton />
                 <MobileAccountButton />
-                <MobileCartButton />
+                <MobileNotificationsButton />
               </div>
             </div>
             <CategoryNav categories={chrome.menu} />

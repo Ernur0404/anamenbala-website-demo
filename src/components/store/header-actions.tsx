@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Heart, ShoppingBag, User } from "lucide-react";
+import { Bell, Heart, ShoppingBag, User } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useStore } from "./store-provider";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ function CountBadge({ count, tone = "sage" }: { count: number; tone?: "sage" | "
 
 export function HeaderActions({ userName }: { userName: string | null }) {
   const t = useTranslations("nav");
-  const { cartCount, favorites } = useStore();
+  const { cartCount, favorites, notificationCount } = useStore();
   const item = "group flex flex-col items-center gap-1 text-[12px] font-medium text-ink-700 transition-colors hover:text-sage-700";
   return (
     <div className="flex items-center gap-7">
@@ -36,6 +36,13 @@ export function HeaderActions({ userName }: { userName: string | null }) {
           <CountBadge count={favorites.size} tone="powder" />
         </span>
         <span>{t("favorites")}</span>
+      </Link>
+      <Link href="/notifications" className={item}>
+        <span className="relative">
+          <Bell className="size-6 stroke-[1.6]" />
+          <CountBadge count={notificationCount} tone="powder" />
+        </span>
+        <span>{t("notifications")}</span>
       </Link>
       <Link href="/cart" className={item}>
         <span className="relative">
@@ -57,13 +64,18 @@ export function MobileAccountButton() {
   );
 }
 
-export function MobileCartButton() {
+/** Телефон: колокольчик в правом углу шапки (корзина — в нижней панели) */
+export function MobileNotificationsButton() {
   const t = useTranslations("nav");
-  const { cartCount } = useStore();
+  const { notificationCount } = useStore();
   return (
-    <Link href="/cart" className="relative grid size-10 place-items-center rounded-full text-graphite hover:bg-beige-100" aria-label={t("cart")}>
-      <ShoppingBag className="size-[22px] stroke-[1.7]" />
-      <CountBadge count={cartCount} />
+    <Link
+      href="/notifications"
+      className="relative grid size-10 place-items-center rounded-full text-graphite hover:bg-beige-100"
+      aria-label={notificationCount > 0 ? t("notificationsUnread", { count: notificationCount }) : t("notifications")}
+    >
+      <Bell className="size-[22px] stroke-[1.7]" />
+      <CountBadge count={notificationCount} tone="powder" />
     </Link>
   );
 }

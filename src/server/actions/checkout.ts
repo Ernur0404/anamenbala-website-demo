@@ -1,7 +1,11 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 import { db } from "../db";
+import { isProduction } from "../env";
+import { GUEST_ORDERS_COOKIE } from "../notification-feed";
+import { addOrderToken } from "@/lib/notifications";
 import { DomainError, type ActionResult } from "../errors";
 import { run } from "./run";
 import { checkoutInputSchema, placeWebsiteOrder, type CheckoutInput } from "../orders/place";
@@ -27,6 +31,16 @@ export async function placeOrderAction(input: CheckoutInput): Promise<ActionResu
       await db.user.update({
         where: { id: user.id },
         data: { customerId: order?.customerId ?? undefined, phone: user.phone ?? order?.customerPhone ?? undefined },
+      });
+    } else {
+      // гость: браузер запоминает заказ, чтобы показывать его статусы в «Уведомлениях»
+      const store = await cookies();
+      store.set(GUEST_ORDERS_COOKIE, addOrderToken(store.get(GUEST_ORDERS_COOKIE)?.value, result.accessToken), {
+        httpOnly: true,
+        secure: isProduction(),
+        sameSite: "lax",
+        path: "/",
+        expires: new Date(Date.now() + 365 * 86_400_000),
       });
     }
     return { number: result.number, accessToken: result.accessToken };

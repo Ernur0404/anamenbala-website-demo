@@ -5,7 +5,9 @@ import { adminAction } from "@/server/admin/action";
 import {
   addProductsSection,
   advantagesSchema,
+  announcementSchema,
   bannerSchema,
+  deleteAnnouncement,
   deleteBanner,
   deleteFaq,
   deleteHomeSection,
@@ -25,7 +27,9 @@ import {
   saveHomeSection,
   saveInstagramPost,
   savePage,
+  saveAnnouncement,
   saveTopbar,
+  toggleAnnouncement,
   toggleBanner,
   toggleHomeSection,
   topbarSchema,
@@ -52,6 +56,10 @@ export const deletePageAction = adminAction("content", byId, async ({ id }, acto
 export const saveFaqAction = adminAction("content", faqSchema, async (input, actor) => saveFaq(input, actor));
 export const moveFaqAction = adminAction("content", move, async ({ id, direction }, actor) => moveFaq(id, direction, actor));
 export const deleteFaqAction = adminAction("content", byId, async ({ id }, actor) => deleteFaq(id, actor));
+
+export const saveAnnouncementAction = adminAction("content", announcementSchema, async (input, actor) => saveAnnouncement(input, actor));
+export const toggleAnnouncementAction = adminAction("content", toggle, async ({ id, isActive }, actor) => toggleAnnouncement(id, isActive, actor));
+export const deleteAnnouncementAction = adminAction("content", byId, async ({ id }, actor) => deleteAnnouncement(id, actor));
 
 export const saveInstagramAction = adminAction("content", instagramSchema, async (input, actor) => saveInstagramPost(input, actor));
 export const moveInstagramAction = adminAction("content", move, async ({ id, direction }, actor) => moveInstagramPost(id, direction, actor));
