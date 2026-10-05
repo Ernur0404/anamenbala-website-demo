@@ -32,8 +32,8 @@ export async function Footer({
   const link = "transition-colors hover:text-sage-700";
 
   return (
-    <footer className="mt-16 border-t border-line bg-white/60">
-      <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1.5fr] lg:gap-8">
+    <footer className="mt-10 border-t border-line bg-white/60 lg:mt-16">
+      <div className="container-page grid gap-8 py-8 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1.5fr] lg:gap-8 lg:py-12">
         <div>
           <Logo name={storeName} tagline={tagline} />
           <div className="mt-6 flex gap-2.5">

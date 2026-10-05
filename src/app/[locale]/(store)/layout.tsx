@@ -52,7 +52,7 @@ export default async function StoreLayout({ children, params }: { children: Reac
             <CategoryNav categories={chrome.menu} />
           </header>
 
-          <main className="flex-1 pb-24 lg:pb-0">{children}</main>
+          <main className="flex-1">{children}</main>
 
           <Footer storeName={chrome.storeName} tagline={chrome.tagline} categories={chrome.menu} contacts={chrome.contacts} extraPages={chrome.footerPages} />
           <div className="h-16 lg:hidden" aria-hidden />

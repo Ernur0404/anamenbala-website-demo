@@ -306,24 +306,33 @@ export async function InstagramSection({ title, posts, profileUrl }: { title: st
   );
 }
 
+const ADVANTAGE_COLS = ["grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4"];
+
+/** Преимущества одним рядом (до 4 в ряд); на телефоне значок над подписью */
 export function AdvantagesStrip({ items, className, compact }: { items: { icon: string; title: string; text: string }[]; className?: string; compact?: boolean }) {
   if (!items.length) return null;
   return (
     <section className={className ?? "container-page mt-10 sm:mt-16"}>
       <div
         className={cn(
-          "grid grid-cols-2 gap-x-4 gap-y-6 rounded-xl border border-line bg-white px-5 py-6 sm:px-8 lg:grid-cols-4",
-          compact && "max-lg:gap-x-3 max-lg:gap-y-3 max-lg:border-0 max-lg:bg-transparent max-lg:p-0",
+          "grid gap-x-2 gap-y-5 rounded-xl border border-line bg-white px-3 py-5 sm:gap-x-4 sm:px-8 sm:py-6",
+          ADVANTAGE_COLS[Math.min(items.length, 4) - 1],
+          compact && "max-lg:border-0 max-lg:bg-transparent max-lg:p-0",
         )}
       >
         {items.map((a) => (
-          <div key={a.title} className={cn("flex items-center gap-3.5", compact && "max-lg:gap-2.5")}>
-            <span className={cn("grid size-12 shrink-0 place-items-center rounded-full border border-sage-200 bg-sage-50 text-sage-700", compact && "max-lg:size-9 max-lg:[&_svg]:size-[18px]")}>
-              <DynamicIcon name={a.icon} className="size-[22px] stroke-[1.6]" />
+          <div key={a.title} className="flex flex-col items-center gap-2 text-center md:flex-row md:gap-3.5 md:text-left">
+            <span
+              className={cn(
+                "grid size-11 shrink-0 place-items-center rounded-full border border-sage-200 bg-sage-50 text-sage-700 md:size-12",
+                compact && "max-lg:size-9 max-lg:[&_svg]:size-[18px]",
+              )}
+            >
+              <DynamicIcon name={a.icon} className="size-5 stroke-[1.6] md:size-[22px]" />
             </span>
             <span className="min-w-0">
-              <span className={cn("block text-[13.5px] leading-tight font-semibold", compact && "max-lg:text-[12px]")}>{a.title}</span>
-              {a.text && <span className={cn("mt-0.5 block text-xs text-ink-500", compact && "max-lg:hidden")}>{a.text}</span>}
+              <span className={cn("block text-[12.5px] leading-tight font-semibold md:text-[13.5px]", compact && "max-lg:text-[12px]")}>{a.title}</span>
+              {a.text && <span className={cn("mt-1 block text-[11px] leading-snug text-ink-500 md:mt-0.5 md:text-xs", compact && "max-lg:hidden")}>{a.text}</span>}
             </span>
           </div>
         ))}
