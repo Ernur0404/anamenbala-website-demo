@@ -385,7 +385,11 @@
     "goInstagram": "Перейти в Instagram",
     "leaveReview": "Оставить отзыв",
     "slide": "Слайд {index}",
-    "recentlyViewed": "Вы недавно смотрели"
+    "recentlyViewed": "Вы недавно смотрели",
+    "forYou": "Подобрали для вас",
+    "saleSticker": "скидки",
+    "saleStickerValue": "до {percent}%",
+    "saleStickerAria": "Скидки до {percent}% — перейти к акциям"
   },
   "errors": {
     "VALIDATION": "Проверьте правильность заполнения",

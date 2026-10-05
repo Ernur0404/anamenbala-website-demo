@@ -1,10 +1,13 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { ArrowRight, Heart, ShieldCheck, Percent, BadgeCheck, LayoutGrid } from "lucide-react";
+import { ArrowRight, Heart, ShieldCheck, Percent, BadgeCheck, LayoutGrid, ChevronRight, Truck } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DynamicIcon, InstagramIcon } from "@/components/ui/icons";
 import { SectionHeading, Stars } from "@/components/ui/display";
 import { ProductCarousel } from "../product-carousel";
+import { ProductGrid } from "../product-card";
+import { SearchBox } from "../search-box";
+import { formatMoney } from "@/lib/money";
 import type { ProductCardData, ImageData } from "@/server/catalog/cards";
 import type { BannerView } from "@/server/content";
 import type { MenuCategory } from "../chrome-types";
@@ -33,35 +36,45 @@ export function ViewAllLink({ href, label }: { href: string; label: string }) {
   );
 }
 
+/**
+ * Разделы кружками: «Для мам», «Для детей», «Для дома», «Для себя», «Акции», «Все категории».
+ * Страница «Каталог» из нижнего меню телефона.
+ */
+export async function CategoryCircles({ categories }: { categories: MenuCategory[] }) {
+  const t = await getTranslations("nav");
+  const item = "group flex flex-col items-center gap-2 text-center";
+  const circle = "relative grid aspect-square w-full max-w-[104px] place-items-center overflow-hidden rounded-full transition-transform group-active:scale-95";
+  const label = "text-[13.5px] leading-tight font-semibold text-graphite";
+  return (
+    <div className="grid grid-cols-3 gap-x-3 gap-y-6 sm:grid-cols-6 sm:gap-x-6">
+      {categories.map((c) => (
+        <Link key={c.id} href={c.href} className={item}>
+          <span className={`${circle} bg-beige-100 text-sage-700 ring-1 ring-line`}>
+            {c.image ? <Image src={c.image.src} alt="" fill sizes="(max-width: 640px) 30vw, 140px" className="object-cover" /> : <DynamicIcon name={c.icon} className="size-9" />}
+          </span>
+          <span className={label}>{c.name}</span>
+        </Link>
+      ))}
+      <Link href="/sale" className={item}>
+        <span className={`${circle} bg-powder-200 text-powder-700`}>
+          <Percent className="size-10 stroke-[2.2]" />
+        </span>
+        <span className={label}>{t("sale")}</span>
+      </Link>
+      <Link href="/catalog" className={item}>
+        <span className={`${circle} bg-sage-100 text-sage-700`}>
+          <LayoutGrid className="size-9 stroke-[1.7]" />
+        </span>
+        <span className={label}>{t("allCategories")}</span>
+      </Link>
+    </div>
+  );
+}
+
 export async function CategoryTiles({ categories }: { categories: MenuCategory[] }) {
   const t = await getTranslations("nav");
-  const circle = "relative grid size-[72px] place-items-center overflow-hidden rounded-full transition-transform group-active:scale-95";
-  const label = "text-[12px] leading-tight font-medium text-graphite";
   return (
-    <section className="container-page mt-6 sm:mt-10">
-      {/* телефон: кружки по 4 в ряд, как в мобильном макете */}
-      <div className="grid grid-cols-4 gap-x-2 gap-y-4 sm:hidden">
-        {categories.map((c) => (
-          <Link key={c.id} href={c.href} className="group flex flex-col items-center gap-1.5 text-center">
-            <span className={`${circle} bg-beige-100 text-sage-700 ring-1 ring-line`}>
-              {c.image ? <Image src={c.image.src} alt="" fill sizes="72px" className="object-cover" /> : <DynamicIcon name={c.icon} className="size-7" />}
-            </span>
-            <span className={label}>{c.name}</span>
-          </Link>
-        ))}
-        <Link href="/sale" className="group flex flex-col items-center gap-1.5 text-center">
-          <span className={`${circle} bg-powder-200 text-powder-700`}>
-            <Percent className="size-8 stroke-[2.2]" />
-          </span>
-          <span className={label}>{t("sale")}</span>
-        </Link>
-        <Link href="/catalog" className="group flex flex-col items-center gap-1.5 text-center">
-          <span className={`${circle} bg-sage-100 text-sage-700`}>
-            <LayoutGrid className="size-7 stroke-[1.7]" />
-          </span>
-          <span className={label}>{t("allCategories")}</span>
-        </Link>
-      </div>
+    <section className="container-page mt-6 hidden sm:mt-10 sm:block">
       <div className="hidden gap-4 sm:grid sm:grid-cols-3 lg:grid-cols-5">
         {categories.map((c) => (
           <Link key={c.id} href={c.href} className="group overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-card">
@@ -93,6 +106,41 @@ export async function CategoryTiles({ categories }: { categories: MenuCategory[]
           </span>
         </Link>
       </div>
+    </section>
+  );
+}
+
+/** Телефон: зелёная панель с большой строкой поиска и строкой о бесплатной доставке (вверху главной) */
+export async function HomeSearchPanel({ freeFrom }: { freeFrom: number | null }) {
+  const t = await getTranslations();
+  return (
+    <section className="rounded-b-[28px] bg-sage-700 px-4 pt-3 pb-4 sm:hidden">
+      <SearchBox variant="hero" />
+      {freeFrom ? (
+        <div className="mt-3 flex items-center gap-3 text-white">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/15">
+            <Truck className="size-[18px]" />
+          </span>
+          <p className="min-w-0 flex-1 text-[13px] leading-snug font-semibold">
+            {t("listing.freeDelivery")} {t("listing.freeDeliveryFrom", { amount: formatMoney(freeFrom) })}
+          </p>
+          <Link href="/delivery" className="inline-flex h-8 shrink-0 items-center gap-0.5 rounded-full bg-white pr-2.5 pl-3.5 text-[12px] font-semibold text-sage-800">
+            {t("common.more")}
+            <ChevronRight className="size-3.5" />
+          </Link>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+/** Телефон: «Подобрали для вас» — товары сеткой по два (вместо кружков разделов) */
+export function ForYouSection({ title, products }: { title: string; products: ProductCardData[] }) {
+  if (!products.length) return null;
+  return (
+    <section className="container-page mt-8 sm:hidden">
+      <SectionHeading title={title} />
+      <ProductGrid products={products} />
     </section>
   );
 }

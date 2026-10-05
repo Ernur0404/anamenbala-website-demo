@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { Heart, House, LayoutGrid, ShoppingBag, User } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useStore } from "./store-provider";
-import { useMobileMenu } from "./catalog-menu";
 import { CountBadge } from "./header-actions";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +12,6 @@ export function BottomNav() {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const { cartCount, favorites } = useStore();
-  const { setOpen } = useMobileMenu();
 
   const item = (active: boolean) =>
     cn("flex flex-1 flex-col items-center justify-center gap-0.5 pt-1.5 text-[10.5px] font-semibold transition-colors", active ? "text-sage-700" : "text-ink-500");
@@ -25,10 +23,10 @@ export function BottomNav() {
           <House className="size-[22px] stroke-[1.7]" />
           {t("home")}
         </Link>
-        <button type="button" onClick={() => setOpen(true)} className={item(pathname.startsWith("/catalog"))}>
+        <Link href="/categories" className={item(pathname === "/categories" || pathname.startsWith("/catalog"))}>
           <LayoutGrid className="size-[22px] stroke-[1.7]" />
           {t("catalog")}
-        </button>
+        </Link>
         <Link href="/favorites" className={item(pathname === "/favorites")}>
           <span className="relative">
             <Heart className="size-[22px] stroke-[1.7]" />

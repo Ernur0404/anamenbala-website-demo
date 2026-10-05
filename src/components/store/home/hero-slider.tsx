@@ -37,9 +37,10 @@ function HeroPicture({ banner, first, warm }: { banner: BannerView; first: boole
   );
 }
 
-function Slide({ banner, first, warm }: { banner: BannerView; first: boolean; warm: boolean }) {
+function Slide({ banner, first, warm, salePercent }: { banner: BannerView; first: boolean; warm: boolean; salePercent?: number | null }) {
+  const t = useTranslations("home");
   return (
-    <div className="relative h-[236px] overflow-hidden bg-beige-100 sm:h-[440px] sm:rounded-2xl lg:h-[420px]">
+    <div className="relative h-[210px] overflow-hidden rounded-2xl bg-beige-100 sm:h-[440px] lg:h-[420px]">
       <HeroPicture banner={banner} first={first} warm={warm} />
       {/* мягкая подложка под текст слева */}
       <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/80 to-transparent [background-size:82%_100%] bg-no-repeat sm:[background-size:70%_100%]" />
@@ -49,9 +50,9 @@ function Slide({ banner, first, warm }: { banner: BannerView; first: boolean; wa
           <Heart className="mt-1 ml-auto size-5 stroke-[1.4]" />
         </p>
       )}
-      <div className="absolute inset-y-0 left-0 flex max-w-[66%] flex-col justify-center py-4 pr-2 pl-5 sm:inset-x-0 sm:max-w-[560px] sm:p-10 lg:p-14">
+      <div className="absolute inset-y-0 left-0 flex max-w-[66%] flex-col justify-center py-4 pr-2 pl-4 sm:inset-x-0 sm:max-w-[560px] sm:p-10 lg:p-14">
         {banner.eyebrow && <p className="mb-1.5 text-[10px] font-bold tracking-[0.14em] text-sage-700 uppercase sm:mb-3 sm:text-[12px] sm:tracking-[0.18em]">{banner.eyebrow}</p>}
-        <h2 className="heading-display text-[27px] text-graphite sm:text-[48px] lg:text-[56px]">{banner.title}</h2>
+        <h2 className="heading-display text-[24px] text-graphite sm:text-[48px] lg:text-[56px]">{banner.title}</h2>
         {banner.text && <p className="mt-1.5 line-clamp-2 max-w-md text-[12.5px] leading-snug text-ink-700 sm:mt-4 sm:line-clamp-none sm:text-base sm:leading-relaxed">{banner.text}</p>}
         {banner.buttonText && banner.url && (
           <Link
@@ -63,11 +64,22 @@ function Slide({ banner, first, warm }: { banner: BannerView; first: boolean; wa
           </Link>
         )}
       </div>
+      {salePercent ? (
+        <Link
+          href="/sale"
+          aria-label={t("saleStickerAria", { percent: salePercent })}
+          className="absolute right-3 bottom-3 flex max-w-[92px] rotate-[-8deg] flex-col items-center rounded-2xl bg-powder-500 px-3 py-1.5 text-center text-white shadow-[0_10px_20px_-10px_rgb(126_66_66/0.8)] transition-transform active:scale-95 sm:hidden"
+        >
+          <span className="mb-0.5 text-[10px] leading-none font-bold tracking-wide uppercase">{t("saleSticker")}</span>
+          <span className="text-[18px] leading-[1.1] font-extrabold">{t("saleStickerValue", { percent: salePercent })}</span>
+        </Link>
+      ) : null}
     </div>
   );
 }
 
-export function HeroSlider({ banners }: { banners: BannerView[] }) {
+/** salePercent — наклейка «скидки до X%» на баннере в мобильной версии (наибольшая скидка в магазине) */
+export function HeroSlider({ banners, salePercent }: { banners: BannerView[]; salePercent?: number | null }) {
   const t = useTranslations("home");
   const [emblaRef, embla] = useEmblaCarousel({ loop: banners.length > 1 });
   const [selected, setSelected] = useState(0);
@@ -103,13 +115,13 @@ export function HeroSlider({ banners }: { banners: BannerView[] }) {
 
   if (!banners.length) return null;
   return (
-    <section className="container-page sm:pt-6" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel">
-      <div className="relative -mx-4 sm:mx-0">
-        <div ref={emblaRef} className="overflow-hidden sm:rounded-2xl">
+    <section className="container-page pt-4 sm:pt-6" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel">
+      <div className="relative">
+        <div ref={emblaRef} className="overflow-hidden rounded-2xl">
           <div className="flex">
             {banners.map((b, i) => (
               <div key={b.id} className="min-w-0 flex-[0_0_100%]" aria-roledescription="slide" aria-label={t("slide", { index: i + 1 })}>
-                <Slide banner={b} first={i === 0} warm={warm} />
+                <Slide banner={b} first={i === 0} warm={warm} salePercent={salePercent} />
               </div>
             ))}
           </div>

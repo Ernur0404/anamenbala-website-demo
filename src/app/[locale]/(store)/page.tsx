@@ -1,10 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getBanners, getFeaturedReviews, getHomeSections, getInstagramPosts, getSectionProducts } from "@/server/content";
+import { getBanners, getFeaturedReviews, getFreeDeliveryThreshold, getHomeSections, getInstagramPosts, getSectionProducts } from "@/server/content";
+import { getFavoriteIds } from "@/server/store-session";
+import { getForYouProducts, getSaleOverview } from "@/server/catalog/landing";
 import { getStoreChrome } from "@/server/store-chrome";
 import { getSetting } from "@/server/settings";
 import { toImage } from "@/server/catalog/cards";
 import { HeroSlider } from "@/components/store/home/hero-slider";
-import { AdvantagesStrip, CategoryTiles, InstagramSection, ProductsSection, PromoBannerSection, ReviewsSection } from "@/components/store/home/sections";
+import { AdvantagesStrip, CategoryTiles, ForYouSection, HomeSearchPanel, InstagramSection, ProductsSection, PromoBannerSection, ReviewsSection } from "@/components/store/home/sections";
 import { RecentlyViewed } from "@/components/store/recently-viewed";
 import { getCategoryIndex, categoryPath } from "@/server/catalog/categories";
 import { pickLocale, tr, type Locale } from "@/lib/l10n";
@@ -17,7 +19,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const locale = raw as Locale;
   const t = await getTranslations();
 
-  const [sections, heroBanners, promoBanners, chrome, advantages, contacts, index] = await Promise.all([
+  const [sections, heroBanners, promoBanners, chrome, advantages, contacts, index, sale, threshold, favoriteIds] = await Promise.all([
     getHomeSections(),
     getBanners("HOME_HERO", locale),
     getBanners("HOME_PROMO", locale),
@@ -25,7 +27,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     getSetting("advantages"),
     getSetting("contacts"),
     getCategoryIndex(),
+    getSaleOverview(),
+    getFreeDeliveryThreshold(),
+    getFavoriteIds(),
   ]);
+
+  // телефон: «Подобрали для вас» вместо кружков разделов — без повторов с блоком «Популярные товары»
+  const popular = sections.find((s) => s.type === "PRODUCTS" && (s.config as SectionConfig | null)?.source === "popular");
+  const popularIds = popular ? (await getSectionProducts(popular.config as SectionConfig, locale)).map((p) => p.id) : [];
+  const forYou = await getForYouProducts(locale, { favoriteIds, excludeIds: popularIds, limit: 8 });
 
   const rendered = await Promise.all(
     sections.map(async (section) => {
@@ -82,7 +92,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <h1 className="sr-only">{chrome.storeName}</h1>
-      <HeroSlider banners={heroBanners} />
+      <HomeSearchPanel freeFrom={threshold} />
+      <HeroSlider banners={heroBanners} salePercent={sale.maxDiscount || null} />
+      <ForYouSection title={t("home.forYou")} products={forYou} />
       {rendered}
     </>
   );

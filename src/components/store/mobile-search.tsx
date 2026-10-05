@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { usePathname } from "@/i18n/navigation";
 import { SearchBox } from "./search-box";
+import { cn } from "@/lib/utils";
 
 /** Поиск на телефоне: значок в шапке открывает строку поиска с подсказками поверх страницы */
 export function MobileSearchButton() {
@@ -18,7 +19,7 @@ export function MobileSearchButton() {
 
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(value) => setOpenAt(value ? pathname : null)}>
-      <DialogPrimitive.Trigger className="grid size-10 place-items-center rounded-full text-graphite hover:bg-beige-100" aria-label={t("label")}>
+      <DialogPrimitive.Trigger className={cn("grid size-10 place-items-center rounded-full text-graphite hover:bg-beige-100", pathname === "/" && "max-sm:hidden")} aria-label={t("label")}>
         <Search className="size-[22px] stroke-[1.7]" />
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>

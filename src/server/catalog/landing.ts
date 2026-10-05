@@ -6,9 +6,10 @@
 import { db } from "../db";
 import { cached, CacheTags } from "../cache";
 import { mediaSelect } from "../media/refs";
-import { toImage, type ImageData } from "./cards";
-import { ancestorIds, categoryPath, getCategoryIndex, isCategoryPublic, type CategoryIndex } from "./categories";
+import { cardSelect, toCard, toImage, type CardRow, type ImageData, type ProductCardData } from "./cards";
+import { ancestorIds, categoryPath, descendantIds, getCategoryIndex, isCategoryPublic, type CategoryIndex } from "./categories";
 import { tr, trOrNull, type Locale } from "@/lib/l10n";
+import type { Prisma } from "@/generated/prisma/client";
 
 export type SaleOverview = {
   count: number;
@@ -90,4 +91,74 @@ export async function getBrandTiles(slugs: string[]): Promise<BrandTile[]> {
   );
   const wanted = new Set(slugs);
   return rows.filter((b) => wanted.has(b.slug)).map((b) => ({ slug: b.slug, name: b.name, logo: toImage(b.logo, b.name) }));
+}
+
+/**
+ * «Подобрали для вас» (главная на телефоне): товары из разделов, которые посетитель добавлял в избранное;
+ * если избранного нет — популярные и с хорошими отзывами, по очереди из разных разделов.
+ * Товары из блока «Популярные товары» (excludeIds) и само избранное не повторяются.
+ */
+export async function getForYouProducts(locale: Locale, opts: { favoriteIds: string[]; excludeIds: string[]; limit?: number }): Promise<ProductCardData[]> {
+  const limit = opts.limit ?? 8;
+  const index = await getCategoryIndex();
+  const visible = index.all.filter((c) => isCategoryPublic(index, c.id)).map((c) => c.id);
+  const base: Prisma.ProductWhereInput = { status: "PUBLISHED", OR: [{ categories: { some: { categoryId: { in: visible } } } }, { categories: { none: {} } }] };
+  const select = { ...cardSelect, categories: { select: { categoryId: true }, take: 1 } } satisfies Prisma.ProductSelect;
+  const rootOf = (categoryId: string | undefined) => (categoryId ? (categoryPath(index, categoryId)[0]?.id ?? "") : "");
+
+  const favorites = new Set(opts.favoriteIds);
+  const picked: CardRow[] = [];
+  const taken = new Set([...favorites, ...opts.excludeIds]);
+
+  // 1) по избранному: товары из тех же корневых разделов
+  if (favorites.size) {
+    const favRows = await db.product.findMany({ where: { id: { in: [...favorites] } }, select: { categories: { select: { categoryId: true } } } });
+    const roots = new Set(favRows.flatMap((f) => f.categories.map((c) => rootOf(c.categoryId))).filter(Boolean));
+    if (roots.size) {
+      const ids = [...roots].flatMap((r) => descendantIds(index, r));
+      const rows = await db.product.findMany({
+        where: { AND: [base, { categories: { some: { categoryId: { in: ids } } } }, { id: { notIn: [...taken] } }] },
+        orderBy: [{ inStock: "desc" }, { salesCount: "desc" }, { ratingAvg: "desc" }],
+        take: limit,
+        select,
+      });
+      for (const row of rows) {
+        picked.push(row);
+        taken.add(row.id);
+      }
+    }
+  }
+
+  // 2) добор: популярные и с хорошими отзывами — по очереди из разных разделов
+  if (picked.length < limit) {
+    const rows = await db.product.findMany({
+      where: { AND: [base, { id: { notIn: [...taken] } }] },
+      orderBy: [{ inStock: "desc" }, { ratingAvg: "desc" }, { salesCount: "desc" }, { publishedAt: "desc" }],
+      take: 48,
+      select,
+    });
+    const groups = new Map<string, typeof rows>();
+    for (const row of rows) {
+      const key = rootOf(row.categories[0]?.categoryId);
+      groups.set(key, [...(groups.get(key) ?? []), row]);
+    }
+    const queues = [...groups.values()];
+    while (picked.length < limit && queues.some((q) => q.length)) {
+      for (const queue of queues) {
+        const row = queue.shift();
+        if (row && picked.length < limit) {
+          picked.push(row);
+          taken.add(row.id);
+        }
+      }
+    }
+  }
+
+  // 3) маленький каталог: добираем из популярных (кроме избранного)
+  if (picked.length < limit && opts.excludeIds.length) {
+    const rows = await db.product.findMany({ where: { AND: [base, { id: { in: opts.excludeIds.filter((id) => !favorites.has(id)) } }] }, select });
+    for (const row of rows) if (picked.length < limit && !picked.some((p) => p.id === row.id)) picked.push(row);
+  }
+
+  return picked.map((row) => toCard(row, locale));
 }

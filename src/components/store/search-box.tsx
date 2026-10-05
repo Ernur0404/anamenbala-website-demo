@@ -9,7 +9,21 @@ import { searchSuggestAction, type SearchSuggestion } from "@/server/actions/sto
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
-export function SearchBox({ className, initialQuery = "", autoFocus, onNavigate }: { className?: string; initialQuery?: string; autoFocus?: boolean; onNavigate?: () => void }) {
+/** variant="hero" — большая строка поиска вверху главной на телефоне (лупа слева) */
+export function SearchBox({
+  className,
+  initialQuery = "",
+  autoFocus,
+  onNavigate,
+  variant = "default",
+}: {
+  className?: string;
+  initialQuery?: string;
+  autoFocus?: boolean;
+  onNavigate?: () => void;
+  variant?: "default" | "hero";
+}) {
+  const hero = variant === "hero";
   const t = useTranslations("search");
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
@@ -73,15 +87,29 @@ export function SearchBox({ className, initialQuery = "", autoFocus, onNavigate 
           autoComplete="off"
           enterKeyHint="search"
           autoFocus={autoFocus}
-          className="h-11 w-full rounded-lg border border-line-strong bg-white pr-20 pl-4 text-sm text-graphite shadow-[0_1px_2px_rgb(47_52_48/0.03)] outline-none transition-[border-color,box-shadow] placeholder:text-ink-400 focus:border-sage-500 focus:ring-3 focus:ring-sage-500/15 [&::-webkit-search-cancel-button]:hidden"
+          className={cn(
+            "w-full bg-white text-graphite outline-none transition-[border-color,box-shadow] placeholder:text-ink-400 [&::-webkit-search-cancel-button]:hidden",
+            hero
+              ? "h-14 rounded-2xl border-0 pr-12 pl-12 text-[15px] shadow-[0_8px_20px_-12px_rgb(0_0_0/0.45)] focus:ring-3 focus:ring-white/60"
+              : "h-11 rounded-lg border border-line-strong pr-20 pl-4 text-sm shadow-[0_1px_2px_rgb(47_52_48/0.03)] focus:border-sage-500 focus:ring-3 focus:ring-sage-500/15",
+          )}
         />
         {query && (
-          <button type="button" onClick={() => setQuery("")} className="absolute top-1/2 right-11 grid size-7 -translate-y-1/2 place-items-center rounded-full text-ink-400 hover:bg-beige-100 hover:text-graphite" aria-label={t("clear")}>
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className={cn("absolute top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full text-ink-400 hover:bg-beige-100 hover:text-graphite", hero ? "right-3" : "right-11")}
+            aria-label={t("clear")}
+          >
             <X className="size-4" />
           </button>
         )}
-        <button type="submit" className="absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-md text-sage-700 hover:bg-sage-50" aria-label={t("label")}>
-          {pending ? <LoaderCircle className="size-[18px] animate-spin" /> : <Search className="size-[18px]" />}
+        <button
+          type="submit"
+          className={cn("absolute top-1/2 grid -translate-y-1/2 place-items-center text-sage-700", hero ? "left-2 size-10 rounded-xl" : "right-1.5 size-8 rounded-md hover:bg-sage-50")}
+          aria-label={t("label")}
+        >
+          {pending ? <LoaderCircle className={cn("animate-spin", hero ? "size-[22px]" : "size-[18px]")} /> : <Search className={cn(hero ? "size-[22px]" : "size-[18px]")} />}
         </button>
       </form>
 

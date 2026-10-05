@@ -385,7 +385,11 @@
     "goInstagram": "Instagram-ға өту",
     "leaveReview": "Пікір қалдыру",
     "slide": "{index}-слайд",
-    "recentlyViewed": "Жақында қарағандарыңыз"
+    "recentlyViewed": "Жақында қарағандарыңыз",
+    "forYou": "Сізге арнап таңдадық",
+    "saleSticker": "жеңілдік",
+    "saleStickerValue": "{percent}%-ға дейін",
+    "saleStickerAria": "{percent}%-ға дейін жеңілдік — акцияларға өту"
   },
   "errors": {
     "VALIDATION": "Толтырудың дұрыстығын тексеріңіз",
