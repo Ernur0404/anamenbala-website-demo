@@ -66,11 +66,22 @@ async function main() {
     if (!process.env[name]) console.warn(`⚠ ${name} не задан — ${hint} (см. docs/VERCEL.md)`);
   }
 
+  const source = ["DATABASE_URL", "POSTGRES_PRISMA_URL", "POSTGRES_URL"].find((key) => /^postgres(ql)?:\/\//.test(process.env[key] ?? ""));
+  const host = databaseUrl().match(/@([^/:?]+)/)?.[1] ?? "?";
+  console.log(`База: ${source} → ${host}`);
+
   run("npx prisma migrate deploy");
 
   const { db } = await import("@/server/db");
-  const empty = (await db.category.count()) === 0;
-  await db.$disconnect();
+  let empty: boolean;
+  try {
+    empty = (await db.category.count()) === 0;
+  } catch (error) {
+    const code = (error as { code?: string }).code ?? "";
+    fail([`Не удалось подключиться к базе ${host}${code ? ` (${code})` : ""}:`, String((error as Error).message ?? error).split("\n")[0]]);
+  } finally {
+    await db.$disconnect();
+  }
   if (empty) {
     console.log("\nБаза пустая — базовое наполнение (категории, настройки, доставка и оплата)…");
     run("npx tsx prisma/seed/index.ts", seedEnv());

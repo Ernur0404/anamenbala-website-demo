@@ -12,7 +12,17 @@ export function defaultAppUrl(): string {
  */
 export function databaseUrl(): string {
   const candidates = [process.env.DATABASE_URL, process.env.POSTGRES_PRISMA_URL, process.env.POSTGRES_URL];
-  return candidates.find((url) => url && /^postgres(ql)?:\/\//.test(url)) ?? "";
+  return withLibpqSsl(candidates.find((url) => url && /^postgres(ql)?:\/\//.test(url)) ?? "");
+}
+
+/**
+ * pg (node-postgres) считает sslmode=require полной проверкой сертификата, а хостинги (Supabase и др.)
+ * пишут его в смысле libpq — «шифровать без проверки»: их сертификат подписан собственным центром,
+ * и строгая проверка обрывает соединение. Включаем совместимость с libpq для prefer/require.
+ */
+export function withLibpqSsl(url: string): string {
+  if (!/[?&]sslmode=(prefer|require)(&|$)/.test(url) || /[?&]uselibpqcompat=/.test(url)) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}uselibpqcompat=true`;
 }
 
 export function appUrl(): string {
