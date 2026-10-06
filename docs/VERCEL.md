@@ -6,23 +6,32 @@
 Настоящий магазин запускается на своём сервере в Казахстане — см. [DEPLOY.md](DEPLOY.md).
 Vercel — для показа.
 
-## Один раз: база данных и настройки
+## Обязательно: база данных
 
-1. **База.** Vercel → проект → **Storage** → **Create Database** → **Neon** (Serverless Postgres) →
-   регион по умолчанию (Washington, D.C. — там же работает сайт) → **Create** → **Connect**
-   к проекту (окружения Production и Preview). Vercel сам добавит `DATABASE_URL`.
-2. **Секреты.** Выполните на компьютере команду — она выведет две готовые строки:
+Vercel → проект → **Storage** → **Create Database** → **Neon** (Serverless Postgres) →
+регион по умолчанию (Washington, D.C. — там же работает сайт) → **Create** → **Connect**
+к этому проекту. Vercel сам добавит переменные подключения (`DATABASE_URL` и другие).
 
-   ```bash
-   node -e "const c=require('crypto');console.log('ENCRYPTION_KEY='+c.randomBytes(32).toString('base64'));console.log('CRON_SECRET='+c.randomBytes(32).toString('hex'))"
-   ```
+Затем **Deployments** → последняя сборка → **⋯** → **Redeploy**. При первой сборке база
+заполнится сама: категории, настройки, доставка и оплата, демо-товары и заказы.
 
-   Vercel → **Settings → Environment Variables** → вставьте обе строки в поле Key
-   (Vercel сам разложит их на две переменные) → **Save**.
-3. **Вход в админку** — там же добавьте `SEED_OWNER_EMAIL` (ваш email) и `SEED_OWNER_PASSWORD`
-   (пароль: от 8 символов, буквы и цифры). Владелец создаётся при первой сборке; после этого пароль из
-   настроек Vercel можно удалить — вход останется.
-4. **Deployments** → последняя сборка → **⋯** → **Redeploy**.
+Подойдёт и другая PostgreSQL из Storage (Supabase и т.п.) — сайт понимает `DATABASE_URL`,
+`POSTGRES_PRISMA_URL` и `POSTGRES_URL`.
+
+## Вход в админку демо-сайта
+
+Settings → **Environment Variables**: `SEED_OWNER_EMAIL` (ваш email) и `SEED_OWNER_PASSWORD`
+(от 8 символов, буквы и цифры) → **Redeploy**. Владелец создаётся один раз; после этого пароль
+из настроек Vercel можно удалить — вход останется. Пароль меняется в админке: «Мой профиль».
+
+## Желательно: секреты
+
+Без них сайт работает, но нельзя сохранить токен Telegram и включить 2FA, не идут фоновые задачи.
+Команда выводит две готовые строки — вставьте их в Settings → Environment Variables (поле Key):
+
+```bash
+node -e "const c=require('crypto');console.log('ENCRYPTION_KEY='+c.randomBytes(32).toString('base64'));console.log('CRON_SECRET='+c.randomBytes(32).toString('hex'))"
+```
 
 Необязательно: `APP_URL` (по умолчанию — адрес проекта на Vercel), `DEMO_DATA=0` — без демо-товаров.
 
@@ -30,11 +39,11 @@ Vercel — для показа.
 
 `npm run vercel-build` (см. `scripts/vercel-prepare.ts`):
 
-1. проверка настроек — если чего-то нет, сборка останавливается и пишет, что добавить;
-2. миграции базы (`prisma migrate deploy`);
-3. если база пустая — категории, настройки, доставка и оплата, владелец из `SEED_OWNER_*`
-   и демо-данные (товары, заказы, акция; удаляются в админке: Настройки → Демо-данные);
-4. сборка сайта.
+1. проверка базы — если её нет, сборка останавливается и пишет, что сделать;
+2. миграции (`prisma migrate deploy`);
+3. если база пустая — базовое наполнение и демо-данные (удаляются в админке: Настройки → Демо-данные);
+4. владелец из `SEED_OWNER_*`, если его ещё нет;
+5. сборка сайта.
 
 Сборки предпросмотра (другие ветки) базу не меняют.
 

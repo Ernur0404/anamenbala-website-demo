@@ -17,7 +17,9 @@ export function safeEqual(a: string, b: string): boolean {
 }
 
 function key(): Buffer {
-  const raw = Buffer.from(env().ENCRYPTION_KEY, "base64");
+  const configured = env().ENCRYPTION_KEY;
+  if (!configured) throw new Error("ENCRYPTION_KEY не задан — секреты (токен Telegram, 2FA) сохранить нельзя");
+  const raw = Buffer.from(configured, "base64");
   if (raw.length !== 32) throw new Error("ENCRYPTION_KEY должен быть 32 байта в base64");
   return raw;
 }

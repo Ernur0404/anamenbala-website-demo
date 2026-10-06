@@ -4,11 +4,13 @@ import { CRON_TASKS, runCronTask, type CronTask } from "@/server/cron";
 
 export const dynamic = "force-dynamic";
 
-/** Секрет из заголовка Authorization: Bearer <CRON_SECRET> (сравнение за постоянное время) */
+/** Секрет из заголовка Authorization: Bearer <CRON_SECRET> (сравнение за постоянное время); без секрета — отказ */
 function authorized(request: Request) {
+  const configured = env().CRON_SECRET;
+  if (!configured) return false;
   const header = request.headers.get("authorization") ?? "";
   const token = Buffer.from(header.startsWith("Bearer ") ? header.slice(7) : "");
-  const secret = Buffer.from(env().CRON_SECRET);
+  const secret = Buffer.from(configured);
   return token.length === secret.length && timingSafeEqual(token, secret);
 }
 
