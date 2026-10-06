@@ -1,9 +1,20 @@
 import { z } from "zod";
 
+/** Публичный адрес сайта без слэша в конце: APP_URL → адрес проекта на Vercel → localhost */
+export function defaultAppUrl(): string {
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return vercel ? `https://${vercel}` : "http://localhost:3000";
+}
+
+export function appUrl(): string {
+  return (process.env.APP_URL || defaultAppUrl()).replace(/\/$/, "");
+}
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL не задан"),
-  APP_URL: z.string().url().default("http://localhost:3000"),
+  // на Vercel без APP_URL — адрес проекта (VERCEL_PROJECT_PRODUCTION_URL)
+  APP_URL: z.preprocess((value) => value || defaultAppUrl(), z.string().url()),
   ENCRYPTION_KEY: z.string().min(40, "ENCRYPTION_KEY: 32 байта в base64"),
   CRON_SECRET: z.string().min(16, "CRON_SECRET слишком короткий"),
   STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),

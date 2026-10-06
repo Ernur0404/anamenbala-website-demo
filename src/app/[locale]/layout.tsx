@@ -10,6 +10,7 @@ import { getSetting } from "@/server/settings";
 import { pickLocale } from "@/lib/l10n";
 import { mediaUrl } from "@/lib/media-url";
 import { db } from "@/server/db";
+import { appUrl } from "@/server/env";
 import "../globals.css";
 
 export const viewport: Viewport = {
@@ -27,9 +28,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     seo.ogImageMediaId ? db.media.findUnique({ where: { id: seo.ogImageMediaId } }) : null,
     general.faviconMediaId ? db.media.findUnique({ where: { id: general.faviconMediaId } }) : null,
   ]);
-  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   return {
-    metadataBase: new URL(appUrl),
+    metadataBase: new URL(appUrl()),
     title: { default: title, template: `%s — ${general.storeName}` },
     description,
     keywords: pickLocale(seo.keywords, locale),

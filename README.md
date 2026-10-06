@@ -6,6 +6,7 @@
 
 - **Владельцу:** [docs/ADMIN-GUIDE.md](docs/ADMIN-GUIDE.md) — как работать в админ-панели.
 - **Запуск на сервере:** [docs/DEPLOY.md](docs/DEPLOY.md) — Docker, HTTPS, бэкапы, восстановление.
+- **Демо на Vercel:** [docs/VERCEL.md](docs/VERCEL.md) — база Neon, настройки, что происходит при сборке.
 
 ## Стек
 

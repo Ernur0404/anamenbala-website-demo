@@ -12,7 +12,7 @@ function authorized(request: Request) {
   return token.length === secret.length && timingSafeEqual(token, secret);
 }
 
-/** Фоновая задача: POST /api/cron/notifications | reprice | cleanup */
+/** Фоновая задача: POST /api/cron/notifications | reprice | cleanup (GET — для Vercel Cron, тот же секрет) */
 export async function POST(request: Request, { params }: { params: Promise<{ task: string }> }) {
   if (!authorized(request)) return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   const { task } = await params;
@@ -26,3 +26,5 @@ export async function POST(request: Request, { params }: { params: Promise<{ tas
     return Response.json({ ok: false, task, error: "failed" }, { status: 500 });
   }
 }
+
+export const GET = POST;

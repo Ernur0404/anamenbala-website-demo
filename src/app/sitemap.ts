@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/server/db";
+import { appUrl } from "@/server/env";
 import { getCategoryIndex, isCategoryPublic } from "@/server/catalog/categories";
 import { categoryHref } from "@/server/catalog/navigation";
 
@@ -7,7 +8,7 @@ import { categoryHref } from "@/server/catalog/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const base = appUrl();
   const entry = (path: string, lastModified?: Date, priority = 0.6): MetadataRoute.Sitemap[number] => ({
     url: `${base}${path === "/" ? "" : path}` || base,
     lastModified,

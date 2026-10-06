@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Truck } from "lucide-react";
 import { getProductPage } from "@/server/catalog/product";
+import { appUrl } from "@/server/env";
 import { getDeliveryMethods } from "@/server/content";
 import { getSetting } from "@/server/settings";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
@@ -46,14 +47,14 @@ export default async function ProductPage({ params }: Props) {
   const [deliveryMethods, advantages] = await Promise.all([getDeliveryMethods(), getSetting("advantages")]);
 
   const crumbs = [{ label: t("common.home"), href: "/" }, ...product.breadcrumbs, { label: product.name }];
-  const appUrl = process.env.APP_URL ?? "";
+  const siteUrl = appUrl();
   const firstImage = product.gallery.find((g) => g.kind === "image");
   const minPrice = Math.min(...product.variants.map((v) => v.price));
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    image: firstImage && firstImage.kind === "image" ? [firstImage.image.src.startsWith("http") ? firstImage.image.src : `${appUrl}${firstImage.image.src}`] : undefined,
+    image: firstImage && firstImage.kind === "image" ? [firstImage.image.src.startsWith("http") ? firstImage.image.src : `${siteUrl}${firstImage.image.src}`] : undefined,
     description: product.descriptionHtml?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 500),
     sku: product.variants[0]?.sku,
     brand: product.brand ? { "@type": "Brand", name: product.brand.name } : undefined,
